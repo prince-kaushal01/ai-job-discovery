@@ -30,6 +30,17 @@ _PATTERNS: list[tuple[str, re.Pattern]] = [
     ("workday", re.compile(r"([a-zA-Z0-9_-]+)\.(wd\d+)\.myworkdayjobs\.com/(?:[a-z]{2}-[A-Z]{2}/)?([a-zA-Z0-9_-]+)")),
     ("teamtailor", re.compile(r"([a-zA-Z0-9_-]+)\.teamtailor\.com")),
     ("bamboohr", re.compile(r"([a-zA-Z0-9_-]+)\.bamboohr\.com")),
+    ("workable", re.compile(r"apply\.workable\.com/([a-zA-Z0-9_%-]+)")),
+    ("recruitee", re.compile(r"([a-zA-Z0-9_-]+)\.recruitee\.com")),
+    # Oracle Recruiting Cloud (Fusion HCM): every tenant hosts its own Fusion
+    # Applications instance, so both the API host and the numeric site
+    # number (embedded together in the career page's <base> tag) are needed.
+    (
+        "oracle_recruiting",
+        re.compile(
+            r'data-apibaseurl="https://([a-zA-Z0-9.\-]+)(?::\d+)?"[^>]*data-sitenumber="([A-Za-z0-9_]+)"'
+        ),
+    ),
 ]
 
 # Hosts that indicate the platform itself, even without a full match above
@@ -59,11 +70,16 @@ def detect_ats(html: str, final_url: str) -> DetectionResult | None:
             if provider == "workday":
                 tenant, wd_host, site = match.group(1), match.group(2), match.group(3)
                 identifier = f"{tenant}.{wd_host}.myworkdayjobs.com/{site}"
+            elif provider == "oracle_recruiting":
+                api_host, site_number = match.group(1), match.group(2)
+                identifier = f"{api_host}|{site_number}"
             else:
                 identifier = match.group(1)
 
             # Skip false positives like "teamtailor.com/blog" as a bare identifier
             if provider in {"teamtailor", "bamboohr"} and identifier in {"www", "app", "api"}:
+                continue
+            if provider == "recruitee" and identifier in {"www", "app", "api", "careers-analytics", "docs", "support"}:
                 continue
             if provider == "greenhouse" and identifier in {"embed", "job_board", "job-boards"}:
                 continue

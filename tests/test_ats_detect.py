@@ -54,6 +54,41 @@ def test_detects_ashby_identifier_with_url_encoded_space():
     assert result.identifier == "Jasper%20AI"
 
 
+def test_detects_workable_from_apply_url():
+    html = '<a href="https://apply.workable.com/acme/j/ABC123">AI Engineer</a>'
+    result = detect_ats(html, "https://acme.com/careers")
+    assert result is not None
+    assert result.provider == "workable"
+    assert result.identifier == "acme"
+
+
+def test_detects_recruitee_subdomain():
+    result = detect_ats("<html></html>", "https://acme.recruitee.com/o/ai-engineer")
+    assert result is not None
+    assert result.provider == "recruitee"
+    assert result.identifier == "acme"
+
+
+def test_recruitee_skips_analytics_subdomain_false_positive():
+    html = '<script src="https://careers-analytics.recruitee.com/track.js"></script>'
+    result = detect_ats(html, "https://acme.com/careers")
+    assert result is None
+
+
+def test_detects_oracle_recruiting_host_and_site_number():
+    html = (
+        '<base href="/en/sites/jobsearch" '
+        'data-apibaseurl="https://eeho.fa.us2.oraclecloud.com:443" '
+        'data-fahosturl="https://eeho.fa.us2.oraclecloud.com:443" '
+        'data-vanitybaseurl="https://careers.oracle.com/" '
+        'data-sitenumber="CX_45001">'
+    )
+    result = detect_ats(html, "https://careers.oracle.com/en/sites/jobsearch")
+    assert result is not None
+    assert result.provider == "oracle_recruiting"
+    assert result.identifier == "eeho.fa.us2.oraclecloud.com|CX_45001"
+
+
 def test_no_match_returns_none():
     result = detect_ats("<html><body>plain careers page</body></html>", "https://acme.com/careers")
     assert result is None

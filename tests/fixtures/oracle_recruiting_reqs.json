@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "TotalJobsCount": 2,
+      "requisitionList": [
+        {
+          "Id": "334643",
+          "Title": "Senior AI Engineer",
+          "PostedDate": "2026-07-30",
+          "PrimaryLocation": "Remote, United States",
+          "WorkplaceType": "Remote",
+          "ShortDescriptionStr": "Build data platforms and AI systems."
+        },
+        {
+          "Id": "334644",
+          "Title": "",
+          "PostedDate": "2026-07-30",
+          "PrimaryLocation": "Austin, TX, United States",
+          "WorkplaceType": "",
+          "ShortDescriptionStr": ""
+        }
+      ]
+    }
+  ]
+}

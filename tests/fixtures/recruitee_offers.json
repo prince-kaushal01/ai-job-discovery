@@ -1,0 +1,21 @@
+{
+  "offers": [
+    {
+      "title": "AI Engineer",
+      "location": "Amsterdam, Noord-Holland, Netherlands",
+      "remote": true,
+      "published_at": "2026-07-30 15:23:41 UTC",
+      "careers_url": "https://careers.acme.com/o/ai-engineer",
+      "careers_apply_url": "https://careers.acme.com/o/ai-engineer/c/new",
+      "sharing_description": "Build ML pipelines."
+    },
+    {
+      "title": "",
+      "location": "Remote",
+      "remote": true,
+      "published_at": "2026-07-30 15:23:41 UTC",
+      "careers_url": "https://careers.acme.com/o/blank",
+      "careers_apply_url": "https://careers.acme.com/o/blank/c/new"
+    }
+  ]
+}

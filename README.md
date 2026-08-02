@@ -8,9 +8,9 @@ against jobs already seen, ranks them for relevance, and emails you a report.
 
 1. Checks every company in `data/companies.csv` (a target list, not a
    scrape-everything list) — auto-detecting Greenhouse, Lever, Ashby,
-   Workday, SmartRecruiters, Teamtailor, and BambooHR job boards and calling
-   each one's public API directly; falls back to a heuristic HTML parser for
-   everything else.
+   Workday, SmartRecruiters, Teamtailor, BambooHR, Workable, Recruitee, and
+   Oracle Recruiting Cloud job boards and calling each one's public API
+   directly; falls back to a heuristic HTML parser for everything else.
 2. Pulls jobs from RemoteOK's public API, We Work Remotely's RSS feed, and
    Himalayas' public search API.
 3. Filters to AI/ML engineering roles only (see `config/config.yaml`).
@@ -132,7 +132,12 @@ tests/                       pytest suite with fixtures for every parser
   loads via authenticated AJAX), Eightfold.ai (API requires a partner key),
   Zoho Recruit (pure client-side rendering), Phenom People (OAuth token
   gated behind their sales team), Jobvite (per-customer opt-in API, public
-  career pages are JS-app shells).
+  career pages are JS-app shells). Workable, Recruitee, and Oracle
+  Recruiting Cloud, by contrast, all turned out to have genuine free public
+  APIs and got dedicated adapters (`ats/workable.py`, `ats/recruitee.py`,
+  `ats/oracle_recruiting.py`) — the difference is simply whether the
+  platform serves candidate-facing job data from its own servers or only
+  renders it client-side/behind a gate.
 - **SQLite file committed back to the repo** is the persistence layer.
   There's no cloud database per the requirements, and GitHub Actions
   runners are ephemeral, so the workflow's last step commits the updated

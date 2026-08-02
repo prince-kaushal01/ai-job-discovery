@@ -1,0 +1,29 @@
+{
+  "name": "Acme Inc",
+  "description": "Acme Inc careers",
+  "jobs": [
+    {
+      "title": "AI Engineer",
+      "shortcode": "ABC123",
+      "employment_type": "Full-time",
+      "telecommuting": true,
+      "department": "Engineering",
+      "url": "https://apply.workable.com/acme/j/ABC123",
+      "shortlink": "https://apply.workable.com/j/ABC123",
+      "application_url": "https://apply.workable.com/acme/j/ABC123/apply",
+      "published_on": "2026-07-30",
+      "country": "France",
+      "city": "Paris",
+      "state": ""
+    },
+    {
+      "title": "",
+      "shortcode": "DEF456",
+      "employment_type": "Full-time",
+      "telecommuting": false,
+      "country": "US",
+      "city": "",
+      "state": ""
+    }
+  ]
+}

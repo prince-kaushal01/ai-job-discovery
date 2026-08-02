@@ -10,7 +10,19 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from jobscraper.ats import ashby, bamboohr, generic_html, greenhouse, lever, smartrecruiters, teamtailor, workday
+from jobscraper.ats import (
+    ashby,
+    bamboohr,
+    generic_html,
+    greenhouse,
+    lever,
+    oracle_recruiting,
+    recruitee,
+    smartrecruiters,
+    teamtailor,
+    workable,
+    workday,
+)
 from jobscraper.ats.detect import detect_ats
 from jobscraper.http_client import HttpClient
 from jobscraper.models import Company, Job
@@ -25,6 +37,9 @@ _ADAPTERS = {
     "smartrecruiters": smartrecruiters.fetch_jobs,
     "teamtailor": teamtailor.fetch_jobs,
     "bamboohr": bamboohr.fetch_jobs,
+    "workable": workable.fetch_jobs,
+    "recruitee": recruitee.fetch_jobs,
+    "oracle_recruiting": oracle_recruiting.fetch_jobs,
 }
 
 
