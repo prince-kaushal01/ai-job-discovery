@@ -10,7 +10,9 @@ from pydantic import BaseModel
 
 
 class ProfileConfig(BaseModel):
-    years_experience: int = 1
+    # Jobs requiring at most this many years of experience are ranked
+    # favorably; jobs requiring more score lower (see ranking._score_yoe).
+    max_years_experience: int = 3
     preferred_countries: list[str] = []
     remote_preference: str = "soft"
     preferred_keywords: list[str] = []

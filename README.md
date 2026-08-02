@@ -243,9 +243,14 @@ tests/                       pytest suite with fixtures for every parser
   `companies_failed` for visibility without stopping the other 214.
 - **Ranking is a transparent weighted score**, not a black box: title match
   (0-40), tech-stack overlap (0-25), remote fit (0-15), country fit (0-10),
-  YOE fit (0-10) → mapped to 1-5 stars. The `rank_reason` string surfaces
-  which factors fired, and the "why it matches" field in the email is built
-  directly from it.
+  YOE fit (0-10) → mapped to 1-5 stars. YOE fit extracts the minimum years
+  of experience mentioned in the job text (the lower bound for a range like
+  "3-5 years") and compares it against `profile.max_years_experience`
+  (default 3): at or under that threshold scores favorably (10/10), over it
+  scores low (2/10), and no YOE mentioned at all is neutral (5/10) — it's
+  not penalized just because it wasn't stated. The `rank_reason` string
+  surfaces which factors fired, and the "why it matches" field in the email
+  is built directly from it.
 
 ## Future extensibility (not implemented yet, designed for)
 

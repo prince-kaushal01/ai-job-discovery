@@ -55,7 +55,7 @@ def score_job(job: Job, profile: ProfileConfig, roles: RolesConfig) -> tuple[flo
     elif job.remote:
         score += 5
 
-    yoe_score, yoe_reason = _score_yoe(text, profile.years_experience)
+    yoe_score, yoe_reason = _score_yoe(text, profile.max_years_experience)
     score += yoe_score
     if yoe_reason:
         reasons.append(yoe_reason)
@@ -77,22 +77,37 @@ def _score_to_stars(score: float) -> int:
     return 1
 
 
-def _score_yoe(text: str, years_experience: int) -> tuple[float, str]:
+def _extract_min_years_required(text: str) -> int | None:
+    """Finds the years-of-experience requirement mentioned in a job's title
+    or description. For a range ("3-5 years") returns the lower bound —
+    that's the actual minimum a candidate needs to qualify. Returns None if
+    no YOE requirement is mentioned at all (checked before falling back to
+    the single-number pattern, which would otherwise match part of a range
+    like the "5" in "3-5 years")."""
     range_match = _YOE_RANGE_RE.search(text)
     if range_match:
-        lo, hi = int(range_match.group(1)), int(range_match.group(2))
-        if lo <= years_experience <= hi:
-            return 10.0, f"YOE requirement ({lo}-{hi} yrs) fits your profile"
-        return 3.0, ""
+        return int(range_match.group(1))
 
     single_match = _YOE_SINGLE_RE.search(text)
     if single_match:
-        required = int(single_match.group(1))
-        if required <= years_experience + 1:
-            return 8.0, f"YOE requirement (~{required}+ yrs) fits your profile"
-        return 2.0, ""
+        return int(single_match.group(1))
 
-    return 5.0, ""  # neutral half-credit when YOE isn't mentioned
+    return None
+
+
+def _score_yoe(text: str, max_years_experience: int) -> tuple[float, str]:
+    """A job requiring at most `max_years_experience` (default 3) is scored
+    favorably; one requiring more is scored low. No YOE mentioned at all is
+    neutral — we can't tell either way, so it shouldn't be penalized."""
+    required = _extract_min_years_required(text)
+
+    if required is None:
+        return 5.0, ""  # neutral half-credit when YOE isn't mentioned
+
+    if required <= max_years_experience:
+        return 10.0, f"needs ~{required} yrs experience (within your {max_years_experience}-yr preference)"
+
+    return 2.0, f"needs ~{required}+ yrs experience (above your {max_years_experience}-yr preference)"
 
 
 def rank_jobs(jobs: list[Job], profile: ProfileConfig, roles: RolesConfig) -> list[Job]:

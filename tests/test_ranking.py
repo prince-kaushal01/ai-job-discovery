@@ -1,9 +1,9 @@
 from jobscraper.config import ProfileConfig, RolesConfig
 from jobscraper.models import Job
-from jobscraper.ranking import cap_per_company, score_job
+from jobscraper.ranking import _extract_min_years_required, _score_yoe, cap_per_company, score_job
 
 PROFILE = ProfileConfig(
-    years_experience=1,
+    max_years_experience=3,
     preferred_countries=["India", "Remote"],
     remote_preference="strong",
     preferred_keywords=["python", "llm", "rag", "pytorch"],
@@ -52,6 +52,45 @@ def test_higher_score_ranks_above_lower():
     strong_score, _, _ = score_job(strong, PROFILE, ROLES)
     weak_score, _, _ = score_job(weak, PROFILE, ROLES)
     assert strong_score > weak_score
+
+
+def test_extract_min_years_from_range_takes_lower_bound():
+    assert _extract_min_years_required("Requires 3-5 years of experience") == 3
+
+
+def test_extract_min_years_from_plus_form():
+    assert _extract_min_years_required("5+ years in ML") == 5
+
+
+def test_extract_min_years_from_single_number():
+    assert _extract_min_years_required("2 years of Python experience") == 2
+
+
+def test_extract_min_years_returns_none_when_not_mentioned():
+    assert _extract_min_years_required("Great team, competitive pay") is None
+
+
+def test_yoe_at_or_under_threshold_scores_favorably():
+    score, reason = _score_yoe("requires 2-3 years of experience", max_years_experience=3)
+    assert score == 10.0
+    assert "within your 3-yr preference" in reason
+
+
+def test_yoe_over_threshold_scores_low():
+    score, reason = _score_yoe("requires 7+ years of experience", max_years_experience=3)
+    assert score == 2.0
+    assert "above your 3-yr preference" in reason
+
+
+def test_yoe_exactly_at_threshold_is_still_favorable():
+    score, _ = _score_yoe("3 years of experience required", max_years_experience=3)
+    assert score == 10.0
+
+
+def test_yoe_not_mentioned_is_neutral_not_penalized():
+    score, reason = _score_yoe("great benefits, flexible hours", max_years_experience=3)
+    assert score == 5.0
+    assert reason == ""
 
 
 def test_cap_per_company_keeps_best_n_and_preserves_order():
