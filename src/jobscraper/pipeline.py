@@ -23,7 +23,7 @@ from jobscraper.ranking import cap_per_company, rank_jobs
 from jobscraper.report import ReportData
 from jobscraper.report.html import render_html
 from jobscraper.report.markdown import render_markdown
-from jobscraper.sources import himalayas, remoteok, weworkremotely
+from jobscraper.sources import himalayas, jobicy, remoteok, weworkremotely
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +95,9 @@ def _run_global_sources_pass(client: HttpClient, settings: Settings) -> list[Job
 
     if "himalayas" in settings.sources.apis:
         jobs.extend(himalayas.fetch_jobs(client, settings.roles.include))
+
+    if "jobicy" in settings.sources.apis:
+        jobs.extend(jobicy.fetch_jobs(client))
 
     logger.info("Global source pass done: %d jobs found", len(jobs))
     return jobs

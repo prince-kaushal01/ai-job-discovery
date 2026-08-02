@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Companies_Tracked-215-2563eb?style=for-the-badge" alt="Companies Tracked"/>
   <img src="https://img.shields.io/badge/ATS_Coverage-29%25-16a34a?style=for-the-badge" alt="ATS Coverage"/>
-  <img src="https://img.shields.io/badge/Global_Sources-3-f97316?style=for-the-badge" alt="Global Sources"/>
+  <img src="https://img.shields.io/badge/Global_Sources-4-f97316?style=for-the-badge" alt="Global Sources"/>
   <img src="https://img.shields.io/badge/Tests-50_passing-22c55e?style=for-the-badge" alt="Tests Passing"/>
   <img src="https://img.shields.io/badge/Cost-%240%2Fmonth-16a34a?style=for-the-badge" alt="Cost"/>
 </p>
@@ -39,7 +39,7 @@
 | Source type | Jobs tracked | Share |
 |---|---:|---:|
 | 🟢 **Direct ATS APIs** (Greenhouse, Ashby, Workday, Lever, SmartRecruiters, Workable, Oracle Recruiting) | 44 | 45% |
-| 🌍 **Global job boards** (Himalayas, RemoteOK, We Work Remotely) | 50 | 51% |
+| 🌍 **Global job boards** (Himalayas, Jobicy, RemoteOK, We Work Remotely) | 50 | 51% |
 | 🔎 **Generic career-page scraping** (no ATS detected — lower precision) | 4 | 4% |
 
 ### 🎯 ATS provider coverage (of 215 target companies)
@@ -68,8 +68,9 @@ company-by-company breakdown of exactly what's covered and what isn't.
    Workday, SmartRecruiters, Teamtailor, BambooHR, Workable, Recruitee, and
    Oracle Recruiting Cloud job boards and calling each one's public API
    directly; falls back to a heuristic HTML parser for everything else.
-2. Pulls jobs from RemoteOK's public API, We Work Remotely's RSS feed, and
-   Himalayas' public search API.
+2. Pulls jobs from RemoteOK's public API, We Work Remotely's RSS feed,
+   Himalayas' public search API, and Jobicy's public API (Data Science &
+   Analytics industry filter).
 3. Filters to AI/ML engineering roles only (see `config/config.yaml`).
 4. Dedupes against everything seen before, and against jobs you've marked as
    applied — nothing is ever recommended twice.
@@ -86,7 +87,7 @@ data/companies.csv           Your target companies (Company, Region, Careers URL
 data/jobscraper.db           SQLite state: companies, jobs, applied_jobs, daily_reports
 src/jobscraper/
   ats/                       One parser per ATS provider + detect.py (sniffs career pages) + generic_html.py fallback
-  sources/                   RemoteOK + We Work Remotely + Himalayas
+  sources/                   RemoteOK + We Work Remotely + Himalayas + Jobicy
   filtering.py               Include/exclude role & keyword rules
   dedupe.py                  Hashing + previously-seen/applied checks
   ranking.py                 1-5 star relevance scoring
@@ -208,13 +209,20 @@ tests/                       pytest suite with fixtures for every parser
   occasional manual re-check — running a browser for 215 companies as part
   of the free daily automation isn't practical, so the daily run keeps using
   whatever ATS is already cached in the CSV.
-- **RemoteOK + We Work Remotely + Himalayas for Source B, for now.** Wellfound
-  and YC Jobs require login or defeat non-browser scraping with anti-bot
-  measures (Wellfound sits behind DataDome, same as LinkedIn/Google Jobs —
-  bypassing it means ToS-violating stealth-browser scraping, which this
-  project won't do); rather than build something brittle, `sources/` is a
-  small plugin interface so a new source is a single new file plus one line
-  in `pipeline.py`. Also investigated and ruled out as ATS adapters: iCIMS
+- **RemoteOK + We Work Remotely + Himalayas + Jobicy for Source B, for now.**
+  Wellfound and YC Jobs require login or defeat non-browser scraping with
+  anti-bot measures (Wellfound sits behind DataDome, same as LinkedIn/Google
+  Jobs — bypassing it means ToS-violating stealth-browser scraping, which
+  this project won't do); rather than build something brittle, `sources/` is
+  a small plugin interface so a new source is a single new file plus one
+  line in `pipeline.py`. Also investigated and ruled out as global sources:
+  Remotive (documented API, but every query param — `category`, `search`,
+  `tag` — is currently silently ignored, always returning the same fixed
+  33-job window), NoDesk and Working Nomads (real feeds, but tiny/unfiltered
+  — 10-28 fixed recent items across all categories, near-zero AI-relevant
+  hits). Jobicy's `industry=data-science` filter, by contrast, genuinely
+  works server-side and returns real, relevant results. Also investigated
+  and ruled out as ATS adapters: iCIMS
   (AWS WAF JS challenge on every tenant), SAP SuccessFactors (job data only
   loads via authenticated AJAX), Eightfold.ai (API requires a partner key),
   Zoho Recruit (pure client-side rendering), Phenom People (OAuth token

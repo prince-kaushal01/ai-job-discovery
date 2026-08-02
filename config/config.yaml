@@ -83,6 +83,7 @@ sources:
   apis:
     remoteok: https://remoteok.com/api
     himalayas: https://himalayas.app/jobs/api/search
+    jobicy: https://jobicy.com/api/v2/remote-jobs
 
 http:
   timeout_seconds: 15

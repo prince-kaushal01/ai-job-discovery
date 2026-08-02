@@ -1,0 +1,32 @@
+{
+  "apiVersion": "2.0",
+  "jobCount": 2,
+  "jobs": [
+    {
+      "id": 148056,
+      "url": "https://jobicy.com/jobs/148056-principal-ml-engineer",
+      "jobSlug": "148056-principal-ml-engineer",
+      "jobTitle": "Principal ML Engineer",
+      "companyName": "Acme Remote",
+      "jobIndustry": ["Data Science & Analytics"],
+      "jobType": ["Full-Time"],
+      "jobGeo": "Europe",
+      "jobLevel": "Senior",
+      "jobExcerpt": "Build ML pipelines.",
+      "pubDate": "2026-07-30T19:20:03+00:00"
+    },
+    {
+      "id": 148057,
+      "url": "https://jobicy.com/jobs/148057-blank",
+      "jobSlug": "148057-blank",
+      "jobTitle": "",
+      "companyName": "Blank Title Co",
+      "jobIndustry": ["Data Science & Analytics"],
+      "jobType": ["Full-Time"],
+      "jobGeo": "Worldwide",
+      "jobLevel": "Mid",
+      "jobExcerpt": "",
+      "pubDate": "2026-07-30T19:20:03+00:00"
+    }
+  ]
+}
