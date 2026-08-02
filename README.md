@@ -1,8 +1,65 @@
-# AI Job Discovery Automation
+# 🚀 AI Job Discovery Automation
 
-A daily, fully-free pipeline that finds high-quality AI Engineering job
-postings from ~215 target companies plus trusted public job boards, dedupes
-against jobs already seen, ranks them for relevance, and emails you a report.
+<p align="center">
+  <img src="https://img.shields.io/badge/Companies_Tracked-215-2563eb?style=for-the-badge" alt="Companies Tracked"/>
+  <img src="https://img.shields.io/badge/ATS_Coverage-29%25-16a34a?style=for-the-badge" alt="ATS Coverage"/>
+  <img src="https://img.shields.io/badge/Global_Sources-3-f97316?style=for-the-badge" alt="Global Sources"/>
+  <img src="https://img.shields.io/badge/Tests-50_passing-22c55e?style=for-the-badge" alt="Tests Passing"/>
+  <img src="https://img.shields.io/badge/Cost-%240%2Fmonth-16a34a?style=for-the-badge" alt="Cost"/>
+</p>
+
+<p align="center">
+  <i>A daily, fully-free pipeline that finds high-quality AI Engineering job<br/>
+  postings from ~215 target companies plus trusted public job boards, dedupes<br/>
+  against jobs already seen, ranks them for relevance, and emails you a report<br/>
+  every morning at 8:00 AM IST.</i>
+</p>
+
+---
+
+## 📊 Snapshot (as of the last run: 2026-08-02)
+
+<table>
+<tr>
+  <td align="center">🏢<br/><b>215</b><br/>companies tracked</td>
+  <td align="center">✅<br/><b>63 (29%)</b><br/>confirmed ATS integration</td>
+  <td align="center">🔍<br/><b>152 (71%)</b><br/>generic fallback parsing</td>
+  <td align="center">⚠️<br/><b>17</b><br/>currently failing to fetch</td>
+</tr>
+<tr>
+  <td align="center">📬<br/><b>58</b><br/>new jobs found</td>
+  <td align="center">📦<br/><b>96</b><br/>total relevant jobs</td>
+  <td align="center">⭐<br/><b>20</b><br/>top picks emailed</td>
+  <td align="center">📧<br/><b>✅ sent</b><br/>daily digest</td>
+</tr>
+</table>
+
+### 🗺️ Where tomorrow's jobs come from
+
+| Source type | Jobs tracked | Share |
+|---|---:|---:|
+| 🟢 **Direct ATS APIs** (Greenhouse, Ashby, Workday, Lever, SmartRecruiters, Workable, Oracle Recruiting) | 44 | 45% |
+| 🌍 **Global job boards** (Himalayas, RemoteOK, We Work Remotely) | 50 | 51% |
+| 🔎 **Generic career-page scraping** (no ATS detected — lower precision) | 4 | 4% |
+
+### 🎯 ATS provider coverage (of 215 target companies)
+
+| Provider | Companies matched | |
+|---|---:|---|
+| 🟦 Workday | 19 | ████████████████████ |
+| 🟩 Greenhouse | 18 | ███████████████████ |
+| 🟪 Ashby | 16 | █████████████████ |
+| 🟧 Lever | 4 | ████ |
+| 🟨 SmartRecruiters | 2 | ██ |
+| 🟥 Oracle Recruiting Cloud | 2 | ██ |
+| ⬛ Workable | 2 | ██ |
+| | | |
+| **Total confirmed** | **63 / 215 (29%)** | |
+
+Run `python scripts/unsupported_companies_report.py` any time for a fresh,
+company-by-company breakdown of exactly what's covered and what isn't.
+
+---
 
 ## What it does, every day
 
@@ -40,6 +97,8 @@ scripts/
   run_daily.py               Main entrypoint (local + GitHub Actions)
   mark_applied.py            CLI to mark a job as applied
   detect_ats.py              Pre-detects each company's ATS and caches it into companies.csv
+  detect_ats_browser.py      Thorough browser-based re-check (JS-rendered/linked ATS integrations)
+  unsupported_companies_report.py  Snapshot of companies with no working ATS integration
 tests/                       pytest suite with fixtures for every parser
 .github/workflows/daily.yml  Runs the pipeline every day at 08:00 IST
 ```
@@ -103,6 +162,16 @@ tests/                       pytest suite with fixtures for every parser
    `--all`). It's slower than `detect_ats.py` (one real page load per
    company) and not run automatically — use it occasionally, the same way.
 
+5d. **See what's not covered yet**:
+   ```
+   python scripts/unsupported_companies_report.py
+   ```
+   Prints (and writes `UNSUPPORTED_COMPANIES.md`) a categorized snapshot of
+   every company with no working ATS integration — split into "ATS known
+   but no adapter built", "adapter currently erroring", and "no ATS
+   detected at all" — cross-referenced against the DB's real last-fetch
+   status where available.
+
 6. **Run tests**:
    ```
    pytest -q
@@ -129,15 +198,16 @@ tests/                       pytest suite with fixtures for every parser
   embeds or redirects to the actual ATS. `ats/detect.py` regex-scans the
   fetched HTML and the final resolved URL for ATS signatures, then hands off
   to that provider's dedicated adapter, which calls the ATS's public JSON
-  API directly (fast, structured, no HTML scraping needed for those ~7
+  API directly (fast, structured, no HTML scraping needed for those
   providers).
-- **Static HTML fetching, no headless browser.** Some career sites render
-  their job list entirely client-side via JavaScript, so neither ATS
-  detection nor the generic fallback will see anything on those pages. This
-  is a deliberate simplicity/reliability tradeoff — running a browser for
-  215 companies daily, for free, isn't practical. Companies like this will
-  simply contribute 0 jobs; check `companies.last_status` in the DB to see
-  which ones.
+- **Static HTML fetching by default, browser-based re-check on demand.**
+  Some career sites render their job list entirely client-side via
+  JavaScript, or only reveal the ATS after following a "view jobs" link —
+  `detect_ats.py`'s single static fetch misses those. `detect_ats_browser.py`
+  covers that gap using a real headless browser (Playwright), but only as an
+  occasional manual re-check — running a browser for 215 companies as part
+  of the free daily automation isn't practical, so the daily run keeps using
+  whatever ATS is already cached in the CSV.
 - **RemoteOK + We Work Remotely + Himalayas for Source B, for now.** Wellfound
   and YC Jobs require login or defeat non-browser scraping with anti-bot
   measures (Wellfound sits behind DataDome, same as LinkedIn/Google Jobs —
@@ -195,3 +265,6 @@ touching the rest of the pipeline:
   Workday career sites use; some tenants customize this enough that the
   adapter returns nothing for them (logged, not fatal).
 - YC Jobs and Wellfound are not yet implemented as sources (see above).
+- The KPI snapshot at the top of this README is a point-in-time figure, not
+  a live dashboard — re-run `scripts/unsupported_companies_report.py` (and
+  update this section) whenever you want current numbers.
