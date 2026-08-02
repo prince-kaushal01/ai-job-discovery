@@ -86,6 +86,23 @@ tests/                       pytest suite with fixtures for every parser
    this occasionally (e.g. monthly) to catch companies that migrate to a
    different ATS; the daily run trusts whatever is cached here until then.
 
+5c. **Thorough browser-based re-check** (optional, slower, catches more):
+   ```
+   pip install playwright && python -m playwright install chromium
+   python scripts/detect_ats_browser.py
+   ```
+   `detect_ats.py` only reads the raw HTTP response — it misses ATS
+   integrations that only render after JS runs, or that live on a linked
+   "view jobs" page rather than the landing page in the CSV. This script
+   renders each company's page in a real (headless) browser, checks the
+   fully-rendered DOM, and — if nothing matches — follows the most likely
+   "view jobs" link or button one hop and checks again. Every match is
+   written to the CSV immediately, so it's safe to interrupt (Ctrl+C) at
+   any point without losing progress; re-running picks up where you left
+   off (it skips companies that already have an ATS set, unless you pass
+   `--all`). It's slower than `detect_ats.py` (one real page load per
+   company) and not run automatically — use it occasionally, the same way.
+
 6. **Run tests**:
    ```
    pytest -q

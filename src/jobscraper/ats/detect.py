@@ -19,6 +19,12 @@ _PATTERNS: list[tuple[str, re.Pattern]] = [
     ("greenhouse", re.compile(r"greenhouse\.io/embed/job_board(?:/js)?\?for=([a-zA-Z0-9_%-]+)")),
     ("greenhouse", re.compile(r"(?:boards|job-boards)\.greenhouse\.io/([a-zA-Z0-9_%-]+)")),
     ("greenhouse", re.compile(r"boards-api\.greenhouse\.io/v1/boards/([a-zA-Z0-9_%-]+)")),
+    # Custom career sites that render Greenhouse job data through their own
+    # UI (never linking boards.greenhouse.io directly) often still leave a
+    # "create job alert" link pointing at my.greenhouse.io with the real
+    # board token in job_board= (e.g. HubSpot, which embeds raw Greenhouse
+    # JSON with no boards.greenhouse.io reference anywhere on the page).
+    ("greenhouse", re.compile(r"my\.greenhouse\.io/users/sign_in\?job_board=([a-zA-Z0-9_%-]+)")),
     ("lever", re.compile(r"jobs\.lever\.co/([a-zA-Z0-9_%-]+)")),
     # Board slugs can contain URL-encoded spaces etc. (e.g. "Jasper%20AI") —
     # the % must be in the character class or the match truncates mid-token.

@@ -11,3 +11,8 @@ feedparser>=6.0
 # dev / test
 pytest>=8.0
 responses>=0.25
+
+# optional: only needed for scripts/detect_ats_browser.py (occasional manual
+# re-check tool, not used by the daily pipeline). After installing, run:
+#   python -m playwright install chromium
+playwright>=1.40

@@ -54,6 +54,17 @@ def test_detects_ashby_identifier_with_url_encoded_space():
     assert result.identifier == "Jasper%20AI"
 
 
+def test_detects_greenhouse_from_job_alert_signin_link():
+    """Real case: HubSpot renders Greenhouse job data through its own custom
+    UI with no boards.greenhouse.io reference anywhere, but still leaves a
+    "create job alert" link at my.greenhouse.io/users/sign_in?job_board=X."""
+    html = '<a href="https://my.greenhouse.io/users/sign_in?job_board=hubspotjobs">Create alert</a>'
+    result = detect_ats(html, "https://www.hubspot.com/careers/jobs")
+    assert result is not None
+    assert result.provider == "greenhouse"
+    assert result.identifier == "hubspotjobs"
+
+
 def test_detects_workable_from_apply_url():
     html = '<a href="https://apply.workable.com/acme/j/ABC123">AI Engineer</a>'
     result = detect_ats(html, "https://acme.com/careers")

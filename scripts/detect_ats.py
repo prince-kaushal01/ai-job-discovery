@@ -73,14 +73,18 @@ def main() -> None:
         user_agent=settings.http.user_agent,
     )
 
-    print(f"Detecting ATS for {len(companies)} companies (concurrency={settings.http.concurrency})...")
+    total = len(companies)
+    print(f"Detecting ATS for {total} companies (concurrency={settings.http.concurrency})...")
     results: dict[str, tuple[str, str]] = {}
+    matched = 0
     with ThreadPoolExecutor(max_workers=settings.http.concurrency) as pool:
         futures = {pool.submit(detect_one, client, c): c for c in companies}
         for i, future in enumerate(as_completed(futures), start=1):
             name, provider, identifier = future.result()
             results[name] = (provider, identifier)
-            print(f"[{i}/{len(companies)}] {name}: {provider or '(none)'}")
+            if provider:
+                matched += 1
+            print(f"[{i}/{total}, {total - i} left, {matched} matched so far] {name}: {provider or '(none)'}")
 
     # Rewrite the CSV, updating only the ATS columns and only for rows we checked.
     with csv_path.open(encoding="utf-8", newline="") as f:
