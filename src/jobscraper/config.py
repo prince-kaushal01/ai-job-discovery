@@ -66,6 +66,10 @@ class EmailConfig(BaseModel):
         return os.environ.get(self.password_env_var)
 
 
+class LimitsConfig(BaseModel):
+    max_jobs_per_company: int = 5
+
+
 class StorageConfig(BaseModel):
     db_path: str = "data/jobscraper.db"
 
@@ -86,6 +90,7 @@ class Settings(BaseModel):
     http: HttpConfig = HttpConfig()
     schedule: ScheduleConfig = ScheduleConfig()
     email: EmailConfig = EmailConfig()
+    limits: LimitsConfig = LimitsConfig()
     storage: StorageConfig = StorageConfig()
     report: ReportConfig = ReportConfig()
     logging: LoggingConfig = LoggingConfig()

@@ -102,3 +102,17 @@ def rank_jobs(jobs: list[Job], profile: ProfileConfig, roles: RolesConfig) -> li
         job.rank_stars = stars
         job.rank_reason = reason
     return sorted(jobs, key=lambda j: j.rank_score, reverse=True)
+
+
+def cap_per_company(jobs: list[Job], max_per_company: int) -> list[Job]:
+    """Keeps at most `max_per_company` jobs per company, preferring the
+    highest-ranked ones. Expects `jobs` to already be sorted by rank_score
+    descending (as rank_jobs returns), so this keeps each company's best."""
+    counts: dict[str, int] = {}
+    capped: list[Job] = []
+    for job in jobs:
+        key = job.company_name.strip().lower()
+        counts[key] = counts.get(key, 0) + 1
+        if counts[key] <= max_per_company:
+            capped.append(job)
+    return capped

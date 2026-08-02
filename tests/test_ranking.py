@@ -1,6 +1,6 @@
 from jobscraper.config import ProfileConfig, RolesConfig
 from jobscraper.models import Job
-from jobscraper.ranking import score_job
+from jobscraper.ranking import cap_per_company, score_job
 
 PROFILE = ProfileConfig(
     years_experience=1,
@@ -52,3 +52,21 @@ def test_higher_score_ranks_above_lower():
     strong_score, _, _ = score_job(strong, PROFILE, ROLES)
     weak_score, _, _ = score_job(weak, PROFILE, ROLES)
     assert strong_score > weak_score
+
+
+def test_cap_per_company_keeps_best_n_and_preserves_order():
+    jobs = [
+        Job(company_name="Reddit", title=f"ML Engineer {i}", apply_url=f"u{i}", source="test", rank_score=100 - i)
+        for i in range(8)
+    ] + [
+        Job(company_name="OpenAI", title="AI Engineer", apply_url="u-openai", source="test", rank_score=95),
+    ]
+    jobs.sort(key=lambda j: j.rank_score, reverse=True)
+
+    capped = cap_per_company(jobs, max_per_company=5)
+
+    reddit_jobs = [j for j in capped if j.company_name == "Reddit"]
+    assert len(reddit_jobs) == 5
+    assert [j.rank_score for j in reddit_jobs] == sorted((j.rank_score for j in reddit_jobs), reverse=True)
+    assert any(j.company_name == "OpenAI" for j in capped)
+    assert len(capped) == 6

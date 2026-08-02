@@ -48,36 +48,31 @@ class HttpClient:
         max_retries: int = 3,
         backoff_seconds: int = 2,
         rate_limit_per_host_seconds: float = 1.0,
-        user_agent: str = "Mozilla/5.0 (compatible; AIJobDiscoveryBot/1.0)",
+        user_agent: str = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        ),
     ) -> None:
         self.timeout_seconds = timeout_seconds
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": user_agent})
+        self.session.headers.update(
+            {
+                "User-Agent": user_agent,
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.9",
+            }
+        )
         self._rate_limiter = RateLimiter(rate_limit_per_host_seconds)
         self._max_retries = max_retries
         self._backoff_seconds = backoff_seconds
 
     def get(self, url: str, **kwargs) -> requests.Response:
-        host = urlparse(url).netloc
-
-        @retry(
-            reraise=True,
-            stop=stop_after_attempt(self._max_retries),
-            wait=wait_exponential(multiplier=self._backoff_seconds, min=1, max=30),
-            retry=retry_if_exception_type(
-                (requests.ConnectionError, requests.Timeout, requests.HTTPError)
-            ),
-        )
-        def _do_get() -> requests.Response:
-            self._rate_limiter.wait(host)
-            resp = self.session.get(url, timeout=self.timeout_seconds, **kwargs)
-            if resp.status_code >= 500 or resp.status_code == 429:
-                resp.raise_for_status()
-            return resp
-
-        return _do_get()
+        return self._request("get", url, **kwargs)
 
     def post(self, url: str, **kwargs) -> requests.Response:
+        return self._request("post", url, **kwargs)
+
+    def _request(self, method: str, url: str, **kwargs) -> requests.Response:
         host = urlparse(url).netloc
 
         @retry(
@@ -88,11 +83,16 @@ class HttpClient:
                 (requests.ConnectionError, requests.Timeout, requests.HTTPError)
             ),
         )
-        def _do_post() -> requests.Response:
+        def _do_request() -> requests.Response:
             self._rate_limiter.wait(host)
-            resp = self.session.post(url, timeout=self.timeout_seconds, **kwargs)
-            if resp.status_code >= 500 or resp.status_code == 429:
+            resp = self.session.request(method, url, timeout=self.timeout_seconds, **kwargs)
+            if resp.status_code == 429:
+                retry_after = resp.headers.get("Retry-After")
+                if retry_after and retry_after.isdigit():
+                    time.sleep(min(int(retry_after), 30))
+                resp.raise_for_status()
+            elif resp.status_code >= 500:
                 resp.raise_for_status()
             return resp
 
-        return _do_post()
+        return _do_request()

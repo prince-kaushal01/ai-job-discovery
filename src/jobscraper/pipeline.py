@@ -19,7 +19,7 @@ from jobscraper.email_sender import send_email
 from jobscraper.filtering import filter_jobs
 from jobscraper.http_client import HttpClient
 from jobscraper.models import Job
-from jobscraper.ranking import rank_jobs
+from jobscraper.ranking import cap_per_company, rank_jobs
 from jobscraper.report import ReportData
 from jobscraper.report.html import render_html
 from jobscraper.report.markdown import render_markdown
@@ -126,6 +126,7 @@ def run_pipeline(
     logger.info("%d jobs after dedupe", len(deduped_jobs))
 
     ranked_jobs = rank_jobs(deduped_jobs, settings.profile, settings.roles)
+    ranked_jobs = cap_per_company(ranked_jobs, settings.limits.max_jobs_per_company)
     for job in ranked_jobs:
         db.upsert_job(job)
 

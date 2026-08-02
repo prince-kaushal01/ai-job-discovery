@@ -46,7 +46,7 @@ def fetch_company_jobs(
         logger.warning("Career page fetch failed for %s: %s", company.name, exc)
         return CompanyFetchResult(company.name, [], None, None, f"error: {exc}")
 
-    if resp.status_code != 200:
+    if not resp.ok:
         status = f"error: HTTP {resp.status_code}"
         logger.warning("%s: %s", company.name, status)
         return CompanyFetchResult(company.name, [], None, None, status)
