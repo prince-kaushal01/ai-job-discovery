@@ -1,14 +1,14 @@
 # ATS Detection Checklist
 
-Tracks which companies in `data/companies.csv` have a confirmed `ATS` + `ATS Identifier`, and which still need a manual look. See README.md for the detection method and the expected identifier format per provider.
+Tracks which companies in `data/companies.csv` have a confirmed `ATS` + `ATS Identifier`, and which still need a manual look. See README.md for the detection method and the expected identifier format per provider. Supported providers: greenhouse, lever, ashby, workday, smartrecruiters, teamtailor, bamboohr, workable, recruitee, oracle_recruiting.
 
 Check items off as you fill in the CSV. Re-run `python scripts/detect_ats.py` any time to pick up ones it can newly detect (e.g. after a company changes career page).
 
 ## Known issues to fix while you're in there
 - [ ] Synthesia is listed twice in the CSV (duplicate row) - delete one
-- [ ] Hugging Face uses Workable (apply.workable.com/huggingface) - an 8th ATS we don't have an adapter for yet. Flag if you find more Workable companies.
+- [ ] Phenom People, SAP SuccessFactors, and Jobvite were investigated and ruled out (gated partner APIs / client-side-only rendering) - see README.
 
-## Done automatically (42)
+## Done automatically (45)
 
 ### Tier 1
 - [x] Accenture India -- ats=workday identifier=accenture.wd103.myworkdayjobs.com/AccentureCareers
@@ -17,6 +17,7 @@ Check items off as you fill in the CSV. Re-run `python scripts/detect_ats.py` an
 - [x] Fractal Analytics -- ats=workday identifier=fractal.wd1.myworkdayjobs.com/Careers
 - [x] Genpact -- ats=workday identifier=genpact.wd108.myworkdayjobs.com/External_Careers
 - [x] Mastercard India -- ats=workday identifier=mastercard.wd1.myworkdayjobs.com/CorporateCareers
+- [x] Oracle India -- ats=oracle_recruiting identifier=eeho.fa.us2.oraclecloud.com|CX_45001
 - [x] Quantiphi -- ats=workday identifier=quantiphi.wd1.myworkdayjobs.com/Careers_at_Quantiphi
 - [x] Reddit -- ats=greenhouse identifier=reddit
 - [x] Workday -- ats=workday identifier=workday.wd5.myworkdayjobs.com/Workday
@@ -37,11 +38,13 @@ Check items off as you fill in the CSV. Re-run `python scripts/detect_ats.py` an
 - [x] Uniphore -- ats=workday identifier=uniphore.wd503.myworkdayjobs.com/Uniphore
 ### Tier 3
 - [x] Anyscale -- ats=ashby identifier=anyscale
+- [x] BenevolentAI -- ats=workable identifier=benevolentai
 - [x] C3.ai -- ats=greenhouse identifier=c3ascend
 - [x] Character.AI -- ats=ashby identifier=character
 - [x] Cohere -- ats=ashby identifier=cohere
 - [x] Enterpret -- ats=greenhouse identifier=enterpret
 - [x] Exscientia -- ats=greenhouse identifier=recursionpharmaceuticals
+- [x] Hugging Face -- ats=workable identifier=huggingface
 - [x] Jasper -- ats=ashby identifier=Jasper%20AI
 - [x] LangChain -- ats=ashby identifier=langchain
 - [x] Neuron7.ai -- ats=lever identifier=neuron7
@@ -56,7 +59,7 @@ Check items off as you fill in the CSV. Re-run `python scripts/detect_ats.py` an
 - [x] Tractable -- ats=ashby identifier=tractable
 - [x] Writer -- ats=ashby identifier=writer
 
-## Still need manual lookup (173)
+## Still need manual lookup (170)
 
 ### Tier 1
 - [ ] Adobe -- https://careers.adobe.com
@@ -108,7 +111,6 @@ Check items off as you fill in the CSV. Re-run `python scripts/detect_ats.py` an
 - [ ] NatWest Digital -- https://jobs.natwestgroup.com
 - [ ] Netflix -- https://jobs.netflix.com
 - [ ] Nutanix India -- https://www.nutanix.com/company/careers
-- [ ] Oracle India -- https://www.oracle.com/careers/
 - [ ] PayPal India -- https://careers.pypl.com
 - [ ] Persistent Systems -- https://www.persistent.com/careers/
 - [ ] Pinterest -- https://www.pinterestcareers.com
@@ -205,7 +207,6 @@ Check items off as you fill in the CSV. Re-run `python scripts/detect_ats.py` an
 ### Tier 3
 - [ ] Abnormal Security -- https://abnormalsecurity.com/careers
 - [ ] Anthropic -- https://www.anthropic.com/careers
-- [ ] BenevolentAI -- https://www.benevolent.com/careers/
 - [ ] DataRobot -- https://www.datarobot.com/careers/
 - [ ] Databricks -- https://www.databricks.com/company/careers
 - [ ] Draup -- https://draup.com/job-openings
@@ -214,7 +215,6 @@ Check items off as you fill in the CSV. Re-run `python scripts/detect_ats.py` an
 - [ ] Glean -- https://www.glean.com/careers
 - [ ] Gong -- https://www.gong.io/careers/
 - [ ] Google DeepMind -- https://deepmind.google/careers/
-- [ ] Hugging Face -- https://apply.workable.com/huggingface/
 - [ ] Iris.ai -- https://iris.ai/careers/
 - [ ] Krutrim (Ola) -- https://www.olacareers.com
 - [ ] Modal -- https://modal.com/careers
