@@ -1,0 +1,23 @@
+[
+  {"legal": "Notice text, not a job"},
+  {
+    "id": "111",
+    "position": "AI Engineer",
+    "company": "Acme Remote",
+    "tags": ["python", "machine-learning"],
+    "location": "Worldwide",
+    "url": "https://remoteok.com/remote-jobs/111",
+    "date": "2026-07-30T00:00:00+00:00",
+    "description": "Build ML pipelines."
+  },
+  {
+    "id": "222",
+    "position": "Sales Executive",
+    "company": "Acme Remote",
+    "tags": ["sales"],
+    "location": "Worldwide",
+    "url": "https://remoteok.com/remote-jobs/222",
+    "date": "2026-07-30T00:00:00+00:00",
+    "description": "Close deals."
+  }
+]

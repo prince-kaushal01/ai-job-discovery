@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title>We Work Remotely</title>
+  <item>
+    <title>Acme Inc: AI Engineer</title>
+    <link>https://weworkremotely.com/remote-jobs/acme-ai-engineer</link>
+    <pubDate>Thu, 30 Jul 2026 00:00:00 +0000</pubDate>
+    <description>Build LLM-powered features.</description>
+  </item>
+  <item>
+    <title>No Colon Job Title</title>
+    <link>https://weworkremotely.com/remote-jobs/no-colon</link>
+    <pubDate>Thu, 30 Jul 2026 00:00:00 +0000</pubDate>
+    <description>Some job.</description>
+  </item>
+</channel>
+</rss>

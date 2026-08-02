@@ -1,0 +1,12 @@
+{
+  "jobs": [
+    {
+      "title": "GenAI Engineer",
+      "location": "Remote",
+      "isRemote": true,
+      "jobUrl": "https://jobs.ashbyhq.com/acme/genai-engineer",
+      "publishedAt": "2026-07-30T00:00:00Z",
+      "descriptionHtml": "<p>LangChain, RAG, and vector databases.</p>"
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Job Digest — {{ data.run_date }}</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f5f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f5f7; padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#1a1f36; padding:28px 32px;">
+              <h1 style="margin:0; color:#ffffff; font-size:20px;">AI Job Digest</h1>
+              <p style="margin:6px 0 0; color:#a9b0c3; font-size:13px;">{{ data.run_date }}</p>
+            </td>
+          </tr>
+
+          <!-- Summary stats -->
+          <tr>
+            <td style="padding:24px 32px 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding:12px; background-color:#f4f5f7; border-radius:8px;">
+                    <div style="font-size:22px; font-weight:700; color:#1a1f36;">{{ data.total_jobs_found }}</div>
+                    <div style="font-size:12px; color:#6b7280;">Total Jobs Found</div>
+                  </td>
+                  <td width="12"></td>
+                  <td align="center" style="padding:12px; background-color:#eef7ee; border-radius:8px;">
+                    <div style="font-size:22px; font-weight:700; color:#166534;">{{ data.new_jobs_found }}</div>
+                    <div style="font-size:12px; color:#166534;">New Jobs</div>
+                  </td>
+                  <td width="12"></td>
+                  <td align="center" style="padding:12px; background-color:#f4f5f7; border-radius:8px;">
+                    <div style="font-size:22px; font-weight:700; color:#1a1f36;">{{ data.companies_checked }}</div>
+                    <div style="font-size:12px; color:#6b7280;">Companies Checked</div>
+                  </td>
+                </tr>
+              </table>
+              {% if data.companies_failed %}
+              <p style="font-size:12px; color:#9ca3af; margin:10px 2px 0;">{{ data.companies_failed }} companies were unreachable today and were skipped.</p>
+              {% endif %}
+            </td>
+          </tr>
+
+          <!-- Recommendations -->
+          <tr>
+            <td style="padding:16px 32px 8px;">
+              <h2 style="font-size:15px; color:#1a1f36; border-bottom:1px solid #e5e7eb; padding-bottom:8px;">
+                Top {{ data.recommendations|length }} Recommendations
+              </h2>
+            </td>
+          </tr>
+
+          {% if not data.recommendations %}
+          <tr>
+            <td style="padding:8px 32px 24px; color:#6b7280; font-size:14px;">
+              No new jobs met the ranking threshold today.
+            </td>
+          </tr>
+          {% endif %}
+
+          {% for job in data.recommendations %}
+          <tr>
+            <td style="padding:8px 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb; border-radius:10px;">
+                <tr>
+                  <td style="padding:16px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td>
+                          <span style="font-size:15px; font-weight:700; color:#1a1f36;">{{ job.title }}</span>
+                          <span style="font-size:13px; color:#6b7280;"> — {{ job.company_name }}</span>
+                        </td>
+                        <td align="right" style="color:#d97706; font-size:14px; white-space:nowrap;">
+                          {{ "★" * job.rank_stars }}{{ "☆" * (5 - job.rank_stars) }}
+                        </td>
+                      </tr>
+                    </table>
+
+                    <div style="margin-top:8px;">
+                      <span style="display:inline-block; font-size:11px; padding:2px 8px; border-radius:999px; background-color:{{ '#eef7ee' if job.remote else '#f4f5f7' }}; color:{{ '#166534' if job.remote else '#374151' }}; margin-right:6px;">
+                        {{ "Remote" if job.remote else "On-site" }}
+                      </span>
+                      {% if job.location %}
+                      <span style="font-size:12px; color:#6b7280;">{{ job.location }}</span>
+                      {% endif %}
+                    </div>
+
+                    <p style="font-size:13px; color:#374151; margin:10px 0 0;">
+                      <strong>Why it matches:</strong> {{ job.rank_reason }}
+                    </p>
+
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;">
+                      <tr>
+                        <td style="font-size:11px; color:#9ca3af;">
+                          ATS: {{ job.ats_platform or "n/a" }} &nbsp;·&nbsp;
+                          Posted: {{ job.posted_date or "n/a" }} &nbsp;·&nbsp;
+                          Priority: {{ job.company_priority or "n/a" }} &nbsp;·&nbsp;
+                          Score: {{ "%.0f"|format(job.rank_score) }}/100
+                        </td>
+                      </tr>
+                    </table>
+
+                    <a href="{{ job.apply_url }}" style="display:inline-block; margin-top:12px; padding:8px 16px; background-color:#1a1f36; color:#ffffff; text-decoration:none; font-size:13px; border-radius:6px;">
+                      Apply →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          {% endfor %}
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 32px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:16px;">
+              Generated automatically by your AI Job Discovery pipeline. Duplicate and previously-applied jobs are never shown twice.
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
