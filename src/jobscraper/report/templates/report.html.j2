@@ -114,6 +114,44 @@
           </tr>
           {% endfor %}
 
+          <!-- Also within experience preference (collapsible) -->
+          {% if data.yoe_favorable_extra %}
+          <tr>
+            <td style="padding:8px 32px 24px;">
+              <details style="border:1px solid #e5e7eb; border-radius:10px; padding:4px 16px;">
+                <summary style="cursor:pointer; padding:12px 0; font-size:14px; font-weight:600; color:#1a1f36;">
+                  Also within your experience preference ({{ data.yoe_favorable_extra|length }}) — tap to expand
+                </summary>
+                <p style="font-size:12px; color:#6b7280; margin:0 0 12px;">
+                  New jobs requiring an experience level you'd qualify for, that didn't rank
+                  high enough for the top picks above.
+                </p>
+                {% for job in data.yoe_favorable_extra %}
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #f0f1f3; padding:10px 0;">
+                  <tr>
+                    <td style="padding:10px 0;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td>
+                            <span style="font-size:13px; font-weight:600; color:#1a1f36;">{{ job.title }}</span>
+                            <span style="font-size:12px; color:#6b7280;"> — {{ job.company_name }}</span>
+                          </td>
+                          <td align="right" style="color:#d97706; font-size:12px; white-space:nowrap;">
+                            {{ "★" * job.rank_stars }}{{ "☆" * (5 - job.rank_stars) }}
+                          </td>
+                        </tr>
+                      </table>
+                      <p style="font-size:11px; color:#9ca3af; margin:4px 0 0;">{{ job.rank_reason }}</p>
+                      <a href="{{ job.apply_url }}" style="font-size:12px; color:#1a1f36;">Apply →</a>
+                    </td>
+                  </tr>
+                </table>
+                {% endfor %}
+              </details>
+            </td>
+          </tr>
+          {% endif %}
+
           <!-- Footer -->
           <tr>
             <td style="padding:24px 32px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:16px;">

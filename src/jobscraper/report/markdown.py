@@ -41,4 +41,21 @@ def render_markdown(data: ReportData) -> str:
                 ]
             )
 
+    if data.yoe_favorable_extra:
+        lines.extend(
+            [
+                f"## Also within your experience preference ({len(data.yoe_favorable_extra)})",
+                "",
+                "New jobs requiring an experience level you'd qualify for, that didn't "
+                "rank high enough for the top picks above:",
+                "",
+            ]
+        )
+        for job in data.yoe_favorable_extra:
+            stars = _STAR_CHARS.get(job.rank_stars, "")
+            lines.append(
+                f"- {job.title} — {job.company_name} {stars} — {job.apply_url}"
+            )
+        lines.append("")
+
     return "\n".join(lines)

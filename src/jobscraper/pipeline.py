@@ -141,6 +141,11 @@ def run_pipeline(
         j for j in new_jobs if j.rank_stars >= settings.email.min_stars_in_email
     ][: settings.email.top_n_in_email]
 
+    recommended_hashes = {j.job_hash for j in recommendations}
+    yoe_favorable_extra = [
+        j for j in new_jobs if j.yoe_favorable and j.job_hash not in recommended_hashes
+    ][: settings.email.yoe_extra_limit]
+
     run_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     report_data = ReportData(
         run_date=run_date,
@@ -149,6 +154,7 @@ def run_pipeline(
         companies_checked=companies_checked,
         companies_failed=companies_failed,
         recommendations=recommendations,
+        yoe_favorable_extra=yoe_favorable_extra,
     )
 
     output_dir = Path(settings.report.output_dir)

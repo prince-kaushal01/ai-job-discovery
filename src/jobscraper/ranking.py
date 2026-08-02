@@ -20,7 +20,7 @@ _YOE_RANGE_RE = re.compile(r"(\d+)\s*(?:-|to)\s*(\d+)\s*\+?\s*years?", re.IGNORE
 _YOE_SINGLE_RE = re.compile(r"(\d+)\s*\+?\s*years?", re.IGNORECASE)
 
 
-def score_job(job: Job, profile: ProfileConfig, roles: RolesConfig) -> tuple[float, int, str]:
+def score_job(job: Job, profile: ProfileConfig, roles: RolesConfig) -> tuple[float, int, str, bool]:
     title_lower = job.title.lower()
     text = job.searchable_text()
     reasons: list[str] = []
@@ -59,10 +59,11 @@ def score_job(job: Job, profile: ProfileConfig, roles: RolesConfig) -> tuple[flo
     score += yoe_score
     if yoe_reason:
         reasons.append(yoe_reason)
+    yoe_favorable = yoe_score == 10.0
 
     stars = _score_to_stars(score)
     reason_text = "; ".join(reasons) if reasons else "General AI/ML role match"
-    return score, stars, reason_text
+    return score, stars, reason_text, yoe_favorable
 
 
 def _score_to_stars(score: float) -> int:
@@ -112,10 +113,11 @@ def _score_yoe(text: str, max_years_experience: int) -> tuple[float, str]:
 
 def rank_jobs(jobs: list[Job], profile: ProfileConfig, roles: RolesConfig) -> list[Job]:
     for job in jobs:
-        score, stars, reason = score_job(job, profile, roles)
+        score, stars, reason, yoe_favorable = score_job(job, profile, roles)
         job.rank_score = score
         job.rank_stars = stars
         job.rank_reason = reason
+        job.yoe_favorable = yoe_favorable
     return sorted(jobs, key=lambda j: j.rank_score, reverse=True)
 
 

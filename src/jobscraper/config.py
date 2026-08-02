@@ -58,6 +58,7 @@ class EmailConfig(BaseModel):
     recipient: str = ""
     top_n_in_email: int = 20
     min_stars_in_email: int = 3
+    yoe_extra_limit: int = 30   # cap on the collapsible "<=max YOE, not in top picks" section
 
     @property
     def sender(self) -> str | None:

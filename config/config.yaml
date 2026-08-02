@@ -108,6 +108,7 @@ email:
   recipient: palyashika641@gmail.com
   top_n_in_email: 20
   min_stars_in_email: 3
+  yoe_extra_limit: 30   # cap on the collapsible "<=max YOE, not in top picks" section
 
 limits:
   max_jobs_per_company: 5   # never show/store more than this many openings from one company per run

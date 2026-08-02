@@ -77,7 +77,9 @@ company-by-company breakdown of exactly what's covered and what isn't.
 5. Ranks every job 1-5 stars based on title match, tech-stack overlap,
    remote/country fit, and years-of-experience fit.
 6. Writes an HTML + Markdown report to `reports/`, and emails the top
-   recommendations to you.
+   recommendations to you — plus a collapsible "Also within your experience
+   preference" section for new jobs that need at most `max_years_experience`
+   but didn't rank high enough on other factors to make the main list.
 
 ## Project layout
 
