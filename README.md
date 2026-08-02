@@ -11,7 +11,8 @@ against jobs already seen, ranks them for relevance, and emails you a report.
    Workday, SmartRecruiters, Teamtailor, and BambooHR job boards and calling
    each one's public API directly; falls back to a heuristic HTML parser for
    everything else.
-2. Pulls jobs from RemoteOK's public API and We Work Remotely's RSS feed.
+2. Pulls jobs from RemoteOK's public API, We Work Remotely's RSS feed, and
+   Himalayas' public search API.
 3. Filters to AI/ML engineering roles only (see `config/config.yaml`).
 4. Dedupes against everything seen before, and against jobs you've marked as
    applied — nothing is ever recommended twice.
@@ -28,7 +29,7 @@ data/companies.csv           Your target companies (Company, Region, Careers URL
 data/jobscraper.db           SQLite state: companies, jobs, applied_jobs, daily_reports
 src/jobscraper/
   ats/                       One parser per ATS provider + detect.py (sniffs career pages) + generic_html.py fallback
-  sources/                   RemoteOK + We Work Remotely
+  sources/                   RemoteOK + We Work Remotely + Himalayas
   filtering.py               Include/exclude role & keyword rules
   dedupe.py                  Hashing + previously-seen/applied checks
   ranking.py                 1-5 star relevance scoring
@@ -120,11 +121,18 @@ tests/                       pytest suite with fixtures for every parser
   215 companies daily, for free, isn't practical. Companies like this will
   simply contribute 0 jobs; check `companies.last_status` in the DB to see
   which ones.
-- **RemoteOK + We Work Remotely only for Source B, for now.** Wellfound and
-  YC Jobs require login or defeat non-browser scraping with anti-bot
-  measures; rather than build something brittle, `sources/` is a small
-  plugin interface (`fetch_jobs(client) -> list[Job]`) so a new source is a
-  single new file plus one line in `pipeline.py`.
+- **RemoteOK + We Work Remotely + Himalayas for Source B, for now.** Wellfound
+  and YC Jobs require login or defeat non-browser scraping with anti-bot
+  measures (Wellfound sits behind DataDome, same as LinkedIn/Google Jobs —
+  bypassing it means ToS-violating stealth-browser scraping, which this
+  project won't do); rather than build something brittle, `sources/` is a
+  small plugin interface so a new source is a single new file plus one line
+  in `pipeline.py`. Also investigated and ruled out as ATS adapters: iCIMS
+  (AWS WAF JS challenge on every tenant), SAP SuccessFactors (job data only
+  loads via authenticated AJAX), Eightfold.ai (API requires a partner key),
+  Zoho Recruit (pure client-side rendering), Phenom People (OAuth token
+  gated behind their sales team), Jobvite (per-customer opt-in API, public
+  career pages are JS-app shells).
 - **SQLite file committed back to the repo** is the persistence layer.
   There's no cloud database per the requirements, and GitHub Actions
   runners are ephemeral, so the workflow's last step commits the updated

@@ -82,6 +82,7 @@ sources:
       url: https://weworkremotely.com/categories/remote-programming-jobs.rss
   apis:
     remoteok: https://remoteok.com/api
+    himalayas: https://himalayas.app/jobs/api/search
 
 http:
   timeout_seconds: 15
