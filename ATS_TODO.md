@@ -1,0 +1,236 @@
+# ATS Detection Checklist
+
+Tracks which companies in `data/companies.csv` have a confirmed `ATS` + `ATS Identifier`, and which still need a manual look. See README.md for the detection method and the expected identifier format per provider.
+
+Check items off as you fill in the CSV. Re-run `python scripts/detect_ats.py` any time to pick up ones it can newly detect (e.g. after a company changes career page).
+
+## Known issues to fix while you're in there
+- [ ] Synthesia is listed twice in the CSV (duplicate row) - delete one
+- [ ] Hugging Face uses Workable (apply.workable.com/huggingface) - an 8th ATS we don't have an adapter for yet. Flag if you find more Workable companies.
+
+## Done automatically (42)
+
+### Tier 1
+- [x] Accenture India -- ats=workday identifier=accenture.wd103.myworkdayjobs.com/AccentureCareers
+- [x] Accenture UK -- ats=workday identifier=accenture.wd103.myworkdayjobs.com/AccentureCareers
+- [x] Barclays -- ats=workday identifier=barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays
+- [x] Fractal Analytics -- ats=workday identifier=fractal.wd1.myworkdayjobs.com/Careers
+- [x] Genpact -- ats=workday identifier=genpact.wd108.myworkdayjobs.com/External_Careers
+- [x] Mastercard India -- ats=workday identifier=mastercard.wd1.myworkdayjobs.com/CorporateCareers
+- [x] Quantiphi -- ats=workday identifier=quantiphi.wd1.myworkdayjobs.com/Careers_at_Quantiphi
+- [x] Reddit -- ats=greenhouse identifier=reddit
+- [x] Workday -- ats=workday identifier=workday.wd5.myworkdayjobs.com/Workday
+- [x] Zendesk -- ats=workday identifier=zendesk.wd1.myworkdayjobs.com/zendesk
+### Tier 2
+- [x] ASOS Tech -- ats=smartrecruiters identifier=ASOS
+- [x] BrowserStack -- ats=workday identifier=browserstack.wd3.myworkdayjobs.com/External
+- [x] CrowdStrike -- ats=workday identifier=crowdstrike.wd5.myworkdayjobs.com/crowdstrikecareers
+- [x] Darktrace -- ats=workday identifier=darktrace.wd3.myworkdayjobs.com/DarktaceExternal
+- [x] Deel -- ats=ashby identifier=Deel
+- [x] Farfetch -- ats=lever identifier=farfetch
+- [x] Freshworks -- ats=smartrecruiters identifier=Freshworks
+- [x] Meesho -- ats=lever identifier=meesho
+- [x] Monzo -- ats=greenhouse identifier=monzo
+- [x] Observe.AI -- ats=greenhouse identifier=observeai
+- [x] Ramp -- ats=ashby identifier=ramp
+- [x] Razorpay -- ats=greenhouse identifier=razorpaysoftwareprivatelimited
+- [x] Uniphore -- ats=workday identifier=uniphore.wd503.myworkdayjobs.com/Uniphore
+### Tier 3
+- [x] Anyscale -- ats=ashby identifier=anyscale
+- [x] C3.ai -- ats=greenhouse identifier=c3ascend
+- [x] Character.AI -- ats=ashby identifier=character
+- [x] Cohere -- ats=ashby identifier=cohere
+- [x] Enterpret -- ats=greenhouse identifier=enterpret
+- [x] Exscientia -- ats=greenhouse identifier=recursionpharmaceuticals
+- [x] Jasper -- ats=ashby identifier=Jasper%20AI
+- [x] LangChain -- ats=ashby identifier=langchain
+- [x] Neuron7.ai -- ats=lever identifier=neuron7
+- [x] Palantir Technologies -- ats=lever identifier=palantir
+- [x] Pinecone -- ats=ashby identifier=pinecone
+- [x] Runway -- ats=ashby identifier=runway-ml
+- [x] Sarvam AI -- ats=ashby identifier=sarvam
+- [x] Sierra -- ats=ashby identifier=Sierra
+- [x] Signal AI -- ats=ashby identifier=signal-ai
+- [x] Stability AI -- ats=greenhouse identifier=stabilityai
+- [x] Together AI -- ats=greenhouse identifier=togetherai
+- [x] Tractable -- ats=ashby identifier=tractable
+- [x] Writer -- ats=ashby identifier=writer
+
+## Still need manual lookup (173)
+
+### Tier 1
+- [ ] Adobe -- https://careers.adobe.com
+- [ ] Adobe India -- https://careers.adobe.com
+- [ ] Affine Analytics -- https://affine.ai/careers
+- [ ] Airbnb -- https://careers.airbnb.com
+- [ ] Amazon -- https://www.amazon.jobs
+- [ ] American Express India -- https://www.americanexpress.com/en-us/careers/
+- [ ] Apple -- https://jobs.apple.com
+- [ ] Atlassian -- https://www.atlassian.com/company/careers
+- [ ] Atlassian India -- https://www.atlassian.com/company/careers
+- [ ] BT Group -- https://www.bt.com/careers
+- [ ] Capgemini India -- https://www.capgemini.com/careers/
+- [ ] Capgemini UK -- https://www.capgemini.com/gb-en/careers/
+- [ ] Cisco India -- https://jobs.cisco.com
+- [ ] Coforge -- https://www.coforge.com/careers
+- [ ] Cognizant -- https://careers.cognizant.com
+- [ ] Course5 Intelligence -- https://www.course5i.com/careers
+- [ ] Deloitte India -- https://www2.deloitte.com/in/en/careers.html
+- [ ] Deloitte UK -- https://www2.deloitte.com/uk/en/careers.html
+- [ ] EXL Service -- https://www.exlservice.com/careers
+- [ ] EY India -- https://www.ey.com/en_in/careers
+- [ ] EY UK -- https://www.ey.com/en_uk/careers
+- [ ] Goldman Sachs India -- https://www.goldmansachs.com/careers/
+- [ ] Google -- https://careers.google.com
+- [ ] Gramener -- https://gramener.com/careers
+- [ ] HCLTech -- https://www.hcltech.com/careers
+- [ ] HSBC Digital -- https://www.hsbc.com/careers
+- [ ] Hexaware Technologies -- https://hexaware.com/careers/
+- [ ] HubSpot -- https://www.hubspot.com/careers
+- [ ] IBM -- https://www.ibm.com/careers
+- [ ] Indium Software -- https://www.indiumsoftware.com/careers
+- [ ] Infosys -- https://www.infosys.com/careers.html
+- [ ] Intel -- https://jobs.intel.com
+- [ ] JPMorgan Chase India -- https://careers.jpmorgan.com
+- [ ] KPMG India -- https://home.kpmg/in/en/home/careers.html
+- [ ] KPMG UK -- https://www.kpmgcareers.co.uk
+- [ ] LTIMindtree -- https://www.ltm.com/us-careers
+- [ ] LatentView Analytics -- https://www.latentview.com/career/
+- [ ] LinkedIn India -- https://careers.linkedin.com
+- [ ] Meta -- https://www.metacareers.com
+- [ ] Micron India -- https://www.micron.com/careers
+- [ ] Microsoft -- https://careers.microsoft.com
+- [ ] Mphasis -- https://careers.mphasis.com
+- [ ] Mu Sigma -- https://www.mu-sigma.com/careers
+- [ ] NTT DATA India -- https://in.nttdata.com/careers
+- [ ] NVIDIA -- https://www.nvidia.com/en-us/about-nvidia/careers/
+- [ ] NVIDIA India -- https://www.nvidia.com/en-us/about-nvidia/careers/
+- [ ] NatWest Digital -- https://jobs.natwestgroup.com
+- [ ] Netflix -- https://jobs.netflix.com
+- [ ] Nutanix India -- https://www.nutanix.com/company/careers
+- [ ] Oracle India -- https://www.oracle.com/careers/
+- [ ] PayPal India -- https://careers.pypl.com
+- [ ] Persistent Systems -- https://www.persistent.com/careers/
+- [ ] Pinterest -- https://www.pinterestcareers.com
+- [ ] PwC India -- https://www.pwc.in/careers.html
+- [ ] PwC UK -- https://www.pwc.co.uk/careers.html
+- [ ] Qualcomm -- https://www.qualcomm.com/company/careers
+- [ ] Rubrik India -- https://www.rubrik.com/company/careers
+- [ ] SAP Labs India -- https://jobs.sap.com
+- [ ] Sage -- https://www.sage.com/en-us/company/careers/career-search/
+- [ ] Salesforce -- https://careers.salesforce.com
+- [ ] Salesforce India -- https://careers.salesforce.com
+- [ ] ServiceNow -- https://careers.servicenow.com
+- [ ] ServiceNow India -- https://careers.servicenow.com
+- [ ] Sigmoid -- https://www.sigmoid.com/careers
+- [ ] Snap Inc. -- https://careers.snap.com
+- [ ] Sonata Software -- https://www.sonata-software.com/careers
+- [ ] Spotify -- https://www.lifeatspotify.com/jobs
+- [ ] TCS -- https://www.tcs.com/careers
+- [ ] Target India -- https://india.target.com/careers
+- [ ] Tech Mahindra -- https://careers.techmahindra.com
+- [ ] Thoughtworks India -- https://www.thoughtworks.com/careers
+- [ ] Thoughtworks UK -- https://www.thoughtworks.com/careers
+- [ ] Tredence -- https://www.tredence.com/company-careers
+- [ ] Twilio -- https://www.twilio.com/en-us/company/jobs
+- [ ] Uber -- https://www.uber.com/careers/
+- [ ] Visa India -- https://usa.visa.com/careers.html
+- [ ] Vodafone -- https://careers.vodafone.com
+- [ ] WNS Global Services -- https://www.wns.com/careers
+- [ ] Walmart Global Tech India -- https://careers.walmart.com/global-tech
+- [ ] Wipro -- https://careers.wipro.com
+### Tier 2
+- [ ] Automattic (WordPress.com) -- https://automattic.com/work-with-us/
+- [ ] Brex -- https://www.brex.com/careers
+- [ ] CRED -- https://careers.cred.club
+- [ ] Chargebee -- https://www.chargebee.com/careers/
+- [ ] CleverTap -- https://clevertap.com/careers/
+- [ ] Cloudflare -- https://www.cloudflare.com/careers/
+- [ ] CoRover.ai -- https://corover.ai/company/careers
+- [ ] Coinbase -- https://www.coinbase.com/careers
+- [ ] Darwinbox -- https://www.darwinbox.com/careers
+- [ ] Datadog -- https://careers.datadoghq.com
+- [ ] Datamatics -- https://www.datamatics.com/human-resources/job-openings
+- [ ] Deliveroo -- https://careers.deliveroo.co.uk
+- [ ] Elastic -- https://www.elastic.co/careers
+- [ ] Faculty AI -- https://faculty.ai/careers/
+- [ ] GitLab -- https://about.gitlab.com/jobs/
+- [ ] Graphcore -- https://www.graphcore.ai/careers
+- [ ] Groww -- https://groww.in/careers
+- [ ] Haptik -- https://haptik.ai/careers
+- [ ] HashiCorp -- https://www.hashicorp.com/careers
+- [ ] Hasura -- https://hasura.io/careers
+- [ ] Icertis -- https://www.icertis.com/company/careers/
+- [ ] Improbable -- https://www.improbable.io/careers
+- [ ] Innovaccer -- https://innovaccer.com/careers
+- [ ] Instabase -- https://instabase.com/careers/
+- [ ] Jocata -- https://www.jocata.com/careers
+- [ ] Jupiter Money -- https://jupiter.money/careers/
+- [ ] Kissflow -- https://kissflow.com/careers/
+- [ ] LeadSquared -- https://www.leadsquared.com/careers/
+- [ ] Locus.sh -- https://locus.sh/careers
+- [ ] MoEngage -- https://www.moengage.com/careers/
+- [ ] MongoDB -- https://www.mongodb.com/careers
+- [ ] Ocado Technology -- https://www.ocadogroup.com/careers
+- [ ] Okta -- https://www.okta.com/company/careers/
+- [ ] PhonePe -- https://www.phonepe.com/careers/
+- [ ] PolyAI -- https://poly.ai/careers/
+- [ ] Postman -- https://www.postman.com/company/careers/
+- [ ] Remote.com -- https://remote.com/careers
+- [ ] Revolut -- https://www.revolut.com/careers/
+- [ ] Rippling -- https://www.rippling.com/careers
+- [ ] Rocketlane -- https://careers.kula.ai/rocketlane
+- [ ] Sahaj Software -- https://sahaj.ai/careers
+- [ ] Setu -- https://setu.co/careers
+- [ ] Signzy -- https://signzy.com/careers/
+- [ ] Slice -- https://sliceit.com/careers
+- [ ] Snowflake -- https://careers.snowflake.com
+- [ ] Splunk (Cisco) -- https://www.splunk.com/en_us/careers.html
+- [ ] Starling Bank -- https://www.starlingbank.com/careers/
+- [ ] Stripe -- https://stripe.com/jobs
+- [ ] Swiggy -- https://careers.swiggy.com
+- [ ] Techolution -- https://www.techolution.com/careers
+- [ ] Urban Company -- https://careers.urbancompany.com
+- [ ] Verloop.io -- https://verloop.io/careers/
+- [ ] Vernacular.ai (Skit.ai) -- https://www.skit.ai/careers
+- [ ] Vymo -- https://vymo.com/careers/
+- [ ] Whatfix -- https://whatfix.com/careers/
+- [ ] Wise -- https://wise.jobs
+- [ ] Yellow.ai -- https://yellow.ai/career/
+- [ ] Zapier -- https://zapier.com/jobs
+- [ ] Zepto -- https://www.zeptonow.com/careers
+- [ ] Zeta -- https://www.zeta.tech/in/careers
+- [ ] Zoho -- https://www.zoho.com/careers.html
+- [ ] Zomato / Eternal -- https://www.zomato.com/careers
+### Tier 3
+- [ ] Abnormal Security -- https://abnormalsecurity.com/careers
+- [ ] Anthropic -- https://www.anthropic.com/careers
+- [ ] BenevolentAI -- https://www.benevolent.com/careers/
+- [ ] DataRobot -- https://www.datarobot.com/careers/
+- [ ] Databricks -- https://www.databricks.com/company/careers
+- [ ] Draup -- https://draup.com/job-openings
+- [ ] ElevenLabs -- https://elevenlabs.io/careers
+- [ ] Entropik -- https://www.entropik.io/careers
+- [ ] Glean -- https://www.glean.com/careers
+- [ ] Gong -- https://www.gong.io/careers/
+- [ ] Google DeepMind -- https://deepmind.google/careers/
+- [ ] Hugging Face -- https://apply.workable.com/huggingface/
+- [ ] Iris.ai -- https://iris.ai/careers/
+- [ ] Krutrim (Ola) -- https://www.olacareers.com
+- [ ] Modal -- https://modal.com/careers
+- [ ] Onfido -- https://onfido.com/careers/
+- [ ] OpenAI -- https://openai.com/careers/
+- [ ] Perplexity AI -- https://www.perplexity.ai/careers
+- [ ] Quantexa -- https://www.quantexa.com/careers/
+- [ ] Replicate -- https://replicate.com/about
+- [ ] Scale AI -- https://scale.com/careers
+- [ ] Speechmatics -- https://www.speechmatics.com/careers
+- [ ] Synthesia -- https://www.synthesia.io/careers
+- [ ] Synthesia -- https://www.synthesia.io/careers
+- [ ] Toptal -- https://www.toptal.com/talent/apply
+- [ ] Turing -- https://www.turing.com/jobs
+- [ ] Vanta -- https://www.vanta.com/careers
+- [ ] Wayve -- https://wayve.ai/careers/
+- [ ] Weights & Biases -- https://wandb.ai/site/careers
+- [ ] Wysa -- https://www.wysa.io/careers
+- [ ] YipitData -- https://www.yipitdata.com/careers
