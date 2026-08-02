@@ -5,6 +5,10 @@ source file to be renamed/remapped:
     Company, Region, Category, Careers / Job Board URL,
     Remote Policy (typical), Est. Junior AI/ML Salary Range (1-3 YOE),
     Notes, Tier, Why Target This Company, Research Status
+
+Two additional columns, ATS and ATS Identifier, are optional: scripts/detect_ats.py
+pre-populates them so the daily run can call a company's ATS API directly
+instead of fetching (and risking a block on) the company's own career page.
 """
 
 from __future__ import annotations
@@ -18,6 +22,8 @@ from jobscraper.models import Company
 logger = logging.getLogger(__name__)
 
 _CAREER_URL_COL = "Careers / Job Board URL"
+ATS_COL = "ATS"
+ATS_IDENTIFIER_COL = "ATS Identifier"
 
 
 def load_companies(csv_path: str | Path) -> list[Company]:
@@ -40,6 +46,8 @@ def load_companies(csv_path: str | Path) -> list[Company]:
                     region=(row.get("Region") or "").strip(),
                     priority=(row.get("Tier") or "").strip(),
                     notes=(row.get("Notes") or "").strip(),
+                    ats_provider=(row.get(ATS_COL) or "").strip() or None,
+                    ats_identifier=(row.get(ATS_IDENTIFIER_COL) or "").strip() or None,
                 )
             )
 

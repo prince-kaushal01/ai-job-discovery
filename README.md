@@ -38,6 +38,7 @@ src/jobscraper/
 scripts/
   run_daily.py               Main entrypoint (local + GitHub Actions)
   mark_applied.py            CLI to mark a job as applied
+  detect_ats.py              Pre-detects each company's ATS and caches it into companies.csv
 tests/                       pytest suite with fixtures for every parser
 .github/workflows/daily.yml  Runs the pipeline every day at 08:00 IST
 ```
@@ -71,6 +72,18 @@ tests/                       pytest suite with fixtures for every parser
    ```
    python scripts/mark_applied.py --company "Acme Inc" --title "AI Engineer" --location "Remote, India"
    ```
+
+5b. **Pre-detect ATS providers** (optional, but recommended after adding/changing companies):
+   ```
+   python scripts/detect_ats.py
+   ```
+   This fetches every company's career page once, sniffs it for a known ATS
+   signature, and writes the result into two new `data/companies.csv`
+   columns: `ATS` and `ATS Identifier`. The daily run then calls that ATS's
+   API directly for those companies instead of fetching the company's own
+   career page — the exact request most bot-protected sites block. Re-run
+   this occasionally (e.g. monthly) to catch companies that migrate to a
+   different ATS; the daily run trusts whatever is cached here until then.
 
 6. **Run tests**:
    ```

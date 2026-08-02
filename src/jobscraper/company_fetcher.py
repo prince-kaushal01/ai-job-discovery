@@ -34,10 +34,45 @@ class CompanyFetchResult:
     jobs: list[Job]
     ats_provider: str | None
     ats_identifier: str | None
-    status: str  # "ok" | "ok:generic" | "error: ..."
+    status: str  # "ok" | "ok:cached" | "ok:generic" | "error: ..."
 
 
 def fetch_company_jobs(
+    client: HttpClient, company: Company, role_keywords: list[str]
+) -> CompanyFetchResult:
+    """If data/companies.csv already has a known ATS + identifier for this
+    company (from scripts/detect_ats.py), call that adapter directly and
+    skip fetching the company's own career page entirely — that page is
+    where most bot-blocking happens, while ATS provider APIs rarely block.
+
+    Adapters already catch their own request/parse errors and return []
+    rather than raise (see ats/base.py), so a stale cached identifier
+    (company migrated ATS since last detected) won't surface as an
+    exception here — it'll just quietly yield 0 jobs. Re-run
+    scripts/detect_ats.py periodically to catch that. The try/except below
+    is defense-in-depth for genuine bugs, not a staleness detector.
+    """
+    if company.ats_provider and company.ats_identifier:
+        adapter = _ADAPTERS.get(company.ats_provider)
+        if adapter is not None:
+            try:
+                jobs = adapter(client, company.ats_identifier, company.name)
+                return CompanyFetchResult(
+                    company.name, jobs, company.ats_provider, company.ats_identifier, "ok:cached"
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Cached %s adapter failed for %s (%s), falling back to re-detection: %s",
+                    company.ats_provider,
+                    company.name,
+                    exc.__class__.__name__,
+                    exc,
+                )
+
+    return _detect_and_fetch(client, company, role_keywords)
+
+
+def _detect_and_fetch(
     client: HttpClient, company: Company, role_keywords: list[str]
 ) -> CompanyFetchResult:
     try:
