@@ -7,11 +7,17 @@ Weights:
     remote fit                            0-15
     country/region fit                    0-10
     years-of-experience fit               0-10
+
+Note: YOE/remote/stack-overlap also feed *hard* filters in pipeline.py for
+what counts as a top recommendation (see _qualifies_for_recommendation) —
+the weighted score alone isn't enough to keep an over-experienced or
+on-site job out of the top picks if its title/stack match is strong.
 """
 
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 
 from jobscraper.config import ProfileConfig, RolesConfig
 from jobscraper.models import Job
@@ -26,7 +32,16 @@ _YOE_RANGE_RE = re.compile(rf"(\d+)\s*(?:-|to)\s*(\d+)\s*\+?\s*{_YOE_UNIT}", re.
 _YOE_SINGLE_RE = re.compile(rf"(\d+)[\s-]*\+?\s*{_YOE_UNIT}", re.IGNORECASE)
 
 
-def score_job(job: Job, profile: ProfileConfig, roles: RolesConfig) -> tuple[float, int, str, bool]:
+@dataclass
+class ScoreResult:
+    score: float
+    stars: int
+    reason: str
+    required_years_experience: int | None
+    has_stack_overlap: bool
+
+
+def score_job(job: Job, profile: ProfileConfig, roles: RolesConfig) -> ScoreResult:
     title_lower = job.title.lower()
     text = job.searchable_text()
     reasons: list[str] = []
@@ -38,7 +53,8 @@ def score_job(job: Job, profile: ProfileConfig, roles: RolesConfig) -> tuple[flo
         reasons.append(f'title matches "{matched_role}"')
 
     matched_keywords = [kw for kw in profile.preferred_keywords if kw.lower() in text]
-    if matched_keywords:
+    has_stack_overlap = bool(matched_keywords)
+    if has_stack_overlap:
         score += min(25, 5 * len(matched_keywords))
         shown = ", ".join(matched_keywords[:5])
         reasons.append(f"stack overlap: {shown}")
@@ -61,15 +77,14 @@ def score_job(job: Job, profile: ProfileConfig, roles: RolesConfig) -> tuple[flo
     elif job.remote:
         score += 5
 
-    yoe_score, yoe_reason = _score_yoe(text, profile.max_years_experience)
+    yoe_score, yoe_reason, required_years = _score_yoe(text, profile.max_years_experience)
     score += yoe_score
     if yoe_reason:
         reasons.append(yoe_reason)
-    yoe_favorable = yoe_score == 10.0
 
     stars = _score_to_stars(score)
     reason_text = "; ".join(reasons) if reasons else "General AI/ML role match"
-    return score, stars, reason_text, yoe_favorable
+    return ScoreResult(score, stars, reason_text, required_years, has_stack_overlap)
 
 
 def _score_to_stars(score: float) -> int:
@@ -102,28 +117,37 @@ def _extract_min_years_required(text: str) -> int | None:
     return None
 
 
-def _score_yoe(text: str, max_years_experience: int) -> tuple[float, str]:
+def _score_yoe(text: str, max_years_experience: int) -> tuple[float, str, int | None]:
     """A job requiring at most `max_years_experience` (default 3) is scored
     favorably; one requiring more is scored low. No YOE mentioned at all is
     neutral — we can't tell either way, so it shouldn't be penalized."""
     required = _extract_min_years_required(text)
 
     if required is None:
-        return 5.0, ""  # neutral half-credit when YOE isn't mentioned
+        return 5.0, "", None  # neutral half-credit when YOE isn't mentioned
 
     if required <= max_years_experience:
-        return 10.0, f"needs ~{required} yrs experience (within your {max_years_experience}-yr preference)"
+        return (
+            10.0,
+            f"needs ~{required} yrs experience (within your {max_years_experience}-yr preference)",
+            required,
+        )
 
-    return 2.0, f"needs ~{required}+ yrs experience (above your {max_years_experience}-yr preference)"
+    return (
+        2.0,
+        f"needs ~{required}+ yrs experience (above your {max_years_experience}-yr preference)",
+        required,
+    )
 
 
 def rank_jobs(jobs: list[Job], profile: ProfileConfig, roles: RolesConfig) -> list[Job]:
     for job in jobs:
-        score, stars, reason, yoe_favorable = score_job(job, profile, roles)
-        job.rank_score = score
-        job.rank_stars = stars
-        job.rank_reason = reason
-        job.yoe_favorable = yoe_favorable
+        result = score_job(job, profile, roles)
+        job.rank_score = result.score
+        job.rank_stars = result.stars
+        job.rank_reason = result.reason
+        job.required_years_experience = result.required_years_experience
+        job.has_stack_overlap = result.has_stack_overlap
     return sorted(jobs, key=lambda j: j.rank_score, reverse=True)
 
 

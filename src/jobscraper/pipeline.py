@@ -28,6 +28,33 @@ from jobscraper.sources import himalayas, jobicy, remoteok, weworkremotely
 logger = logging.getLogger(__name__)
 
 
+def _qualifies_for_recommendation(job: Job, max_years_experience: int) -> bool:
+    """Hard requirements for the main Top N Recommendations: remote, real
+    tech-stack overlap, and within the YOE ceiling (or YOE simply isn't
+    mentioned — we don't penalize a job just for not stating it)."""
+    within_yoe = (
+        job.required_years_experience is None
+        or job.required_years_experience <= max_years_experience
+    )
+    return job.remote and job.has_stack_overlap and within_yoe
+
+
+def _not_recommended_reason(job: Job, max_years_experience: int) -> str:
+    """Explains why a job landed in "worth looking at" instead of the main
+    list, so it's a visible classification, not a silent drop."""
+    notes: list[str] = []
+    if job.required_years_experience is not None and job.required_years_experience > max_years_experience:
+        notes.append(
+            f"needs ~{job.required_years_experience}+ yrs experience "
+            f"(above your {max_years_experience}-yr preference)"
+        )
+    if not job.remote:
+        notes.append("on-site / not remote")
+    if not job.has_stack_overlap:
+        notes.append("no direct tech-stack overlap detected")
+    return "; ".join(notes) if notes else "ranked below your top picks"
+
+
 def _run_company_pass(
     client: HttpClient, db: Database, settings: Settings, company_limit: int | None
 ) -> tuple[list[Job], int, int]:
@@ -138,13 +165,22 @@ def run_pipeline(
 
     new_jobs = [j for j in ranked_jobs if j.is_new]
     recommendations = [
-        j for j in new_jobs if j.rank_stars >= settings.email.min_stars_in_email
+        j
+        for j in new_jobs
+        if j.rank_stars >= settings.email.min_stars_in_email
+        and _qualifies_for_recommendation(j, settings.profile.max_years_experience)
     ][: settings.email.top_n_in_email]
 
     recommended_hashes = {j.job_hash for j in recommendations}
-    yoe_favorable_extra = [
-        j for j in new_jobs if j.yoe_favorable and j.job_hash not in recommended_hashes
-    ][: settings.email.yoe_extra_limit]
+    worth_looking_at: list[Job] = []
+    for j in new_jobs:
+        if j.job_hash in recommended_hashes:
+            continue
+        # Overwrite rank_reason for display in this report only — already
+        # upserted to the DB above, so this doesn't touch stored history.
+        j.rank_reason = _not_recommended_reason(j, settings.profile.max_years_experience)
+        worth_looking_at.append(j)
+    worth_looking_at = worth_looking_at[: settings.email.worth_looking_at_limit]
 
     run_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     report_data = ReportData(
@@ -154,7 +190,7 @@ def run_pipeline(
         companies_checked=companies_checked,
         companies_failed=companies_failed,
         recommendations=recommendations,
-        yoe_favorable_extra=yoe_favorable_extra,
+        worth_looking_at=worth_looking_at,
     )
 
     output_dir = Path(settings.report.output_dir)

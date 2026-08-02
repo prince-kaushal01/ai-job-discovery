@@ -114,19 +114,20 @@
           </tr>
           {% endfor %}
 
-          <!-- Also within experience preference (collapsible) -->
-          {% if data.yoe_favorable_extra %}
+          <!-- Other jobs worth looking at (collapsible) -->
+          {% if data.worth_looking_at %}
           <tr>
             <td style="padding:8px 32px 24px;">
               <details style="border:1px solid #e5e7eb; border-radius:10px; padding:4px 16px;">
                 <summary style="cursor:pointer; padding:12px 0; font-size:14px; font-weight:600; color:#1a1f36;">
-                  Also within your experience preference ({{ data.yoe_favorable_extra|length }}) — tap to expand
+                  Other jobs worth looking at ({{ data.worth_looking_at|length }}) — tap to expand
                 </summary>
                 <p style="font-size:12px; color:#6b7280; margin:0 0 12px;">
-                  New jobs requiring an experience level you'd qualify for, that didn't rank
-                  high enough for the top picks above.
+                  New jobs that matched your target roles but didn't qualify for the top
+                  picks above — over-experienced, on-site, no direct stack overlap, or just
+                  ranked lower. Reason noted per job.
                 </p>
-                {% for job in data.yoe_favorable_extra %}
+                {% for job in data.worth_looking_at %}
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #f0f1f3; padding:10px 0;">
                   <tr>
                     <td style="padding:10px 0;">

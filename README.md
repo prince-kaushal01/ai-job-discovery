@@ -75,11 +75,15 @@ company-by-company breakdown of exactly what's covered and what isn't.
 4. Dedupes against everything seen before, and against jobs you've marked as
    applied — nothing is ever recommended twice.
 5. Ranks every job 1-5 stars based on title match, tech-stack overlap,
-   remote/country fit, and years-of-experience fit.
+   remote/country fit, and years-of-experience fit. Remote, real stack
+   overlap, and being within `profile.max_years_experience` are *hard*
+   requirements for the Top N Recommendations — a strong title match alone
+   can't carry an over-experienced or on-site job into the main list.
 6. Writes an HTML + Markdown report to `reports/`, and emails the top
-   recommendations to you — plus a collapsible "Also within your experience
-   preference" section for new jobs that need at most `max_years_experience`
-   but didn't rank high enough on other factors to make the main list.
+   recommendations to you — plus a collapsible "Other jobs worth looking
+   at" section for new jobs that matched your target roles but didn't
+   qualify for the main list (over-experienced, on-site, no direct stack
+   overlap, or just ranked lower), each with the specific reason noted.
 
 ## Project layout
 
@@ -253,6 +257,14 @@ tests/                       pytest suite with fixtures for every parser
   not penalized just because it wasn't stated. The `rank_reason` string
   surfaces which factors fired, and the "why it matches" field in the email
   is built directly from it.
+- **The weighted score alone isn't enough to reach the Top N Recommendations.**
+  A job with a strong title/stack match could still slip in despite requiring
+  8+ years of experience or being on-site, since YOE/remote are only worth
+  10-15 of 100 points. `pipeline._qualifies_for_recommendation` enforces
+  remote, real stack overlap, and the YOE ceiling as *hard* filters on top of
+  the star threshold — jobs that fail any of those go into "Other jobs worth
+  looking at" instead of the main list, each annotated with the specific
+  reason (`pipeline._not_recommended_reason`) rather than silently dropped.
 
 ## Future extensibility (not implemented yet, designed for)
 

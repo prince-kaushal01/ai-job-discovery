@@ -17,7 +17,8 @@ class ReportData:
     companies_checked: int
     companies_failed: int
     recommendations: list[Job]
-    # New jobs requiring <= profile.max_years_experience that didn't make
-    # the cut into `recommendations` (lower star rating / past top_n) —
-    # shown in a collapsible "see more" section instead of the main list.
-    yoe_favorable_extra: list[Job] = field(default_factory=list)
+    # New jobs that didn't qualify for `recommendations` (over-experienced,
+    # not remote, no direct stack overlap, or just ranked lower) — shown in
+    # a collapsible "worth looking at" section instead of being dropped
+    # silently. job.rank_reason is overwritten to explain why for each one.
+    worth_looking_at: list[Job] = field(default_factory=list)

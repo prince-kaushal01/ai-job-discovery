@@ -41,20 +41,22 @@ def render_markdown(data: ReportData) -> str:
                 ]
             )
 
-    if data.yoe_favorable_extra:
+    if data.worth_looking_at:
         lines.extend(
             [
-                f"## Also within your experience preference ({len(data.yoe_favorable_extra)})",
+                f"## Other jobs worth looking at ({len(data.worth_looking_at)})",
                 "",
-                "New jobs requiring an experience level you'd qualify for, that didn't "
-                "rank high enough for the top picks above:",
+                "New jobs that matched your target roles but didn't qualify for the top "
+                "picks above — over-experienced, on-site, no direct stack overlap, or just "
+                "ranked lower. Reason noted per job:",
                 "",
             ]
         )
-        for job in data.yoe_favorable_extra:
+        for job in data.worth_looking_at:
             stars = _STAR_CHARS.get(job.rank_stars, "")
             lines.append(
-                f"- {job.title} — {job.company_name} {stars} — {job.apply_url}"
+                f"- {job.title} — {job.company_name} {stars} — {job.apply_url}\n"
+                f"  _{job.rank_reason}_"
             )
         lines.append("")
 

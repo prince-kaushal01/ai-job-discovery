@@ -41,7 +41,8 @@ class Job:
     rank_stars: int = 0
     rank_reason: str = ""
     is_new: bool = True
-    yoe_favorable: bool = False      # requires <= profile.max_years_experience
+    required_years_experience: int | None = None  # extracted from text; None if not mentioned
+    has_stack_overlap: bool = False               # matched >=1 profile.preferred_keywords
 
     def searchable_text(self) -> str:
         return f"{self.title}\n{self.location}\n{self.description}".lower()

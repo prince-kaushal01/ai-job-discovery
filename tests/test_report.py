@@ -55,9 +55,9 @@ def test_empty_recommendations_render_gracefully():
     assert "No new jobs met the ranking threshold" in html
 
 
-def test_yoe_favorable_extra_renders_as_collapsible_section_in_html():
+def test_worth_looking_at_renders_as_collapsible_section_in_html():
     data = _sample_data()
-    data.yoe_favorable_extra = [
+    data.worth_looking_at = [
         Job(
             company_name="Beta Inc",
             title="ML Engineer",
@@ -65,35 +65,37 @@ def test_yoe_favorable_extra_renders_as_collapsible_section_in_html():
             source="company_ats",
             rank_score=55.0,
             rank_stars=3,
-            rank_reason="needs ~2 yrs experience (within your 3-yr preference)",
+            rank_reason="needs ~7+ yrs experience (above your 3-yr preference)",
         )
     ]
     html = render_html(data)
     assert "<details" in html
     assert "<summary" in html
-    assert "Also within your experience preference (1)" in html
+    assert "Other jobs worth looking at (1)" in html
     assert "ML Engineer" in html
     assert "Beta Inc" in html
     assert "https://beta.com/apply" in html
 
 
-def test_yoe_favorable_extra_omitted_from_html_when_empty():
+def test_worth_looking_at_omitted_from_html_when_empty():
     html = render_html(_sample_data())
     assert "<details" not in html
 
 
-def test_yoe_favorable_extra_renders_in_markdown():
+def test_worth_looking_at_renders_in_markdown():
     data = _sample_data()
-    data.yoe_favorable_extra = [
+    data.worth_looking_at = [
         Job(
             company_name="Beta Inc",
             title="ML Engineer",
             apply_url="https://beta.com/apply",
             source="company_ats",
             rank_stars=3,
+            rank_reason="on-site / not remote",
         )
     ]
     md = render_markdown(data)
-    assert "Also within your experience preference (1)" in md
+    assert "Other jobs worth looking at (1)" in md
     assert "ML Engineer" in md
     assert "https://beta.com/apply" in md
+    assert "on-site / not remote" in md

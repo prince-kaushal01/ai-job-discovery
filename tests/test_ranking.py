@@ -21,10 +21,11 @@ def test_perfect_match_scores_five_stars():
         remote=True,
         description="Use Python, LLM, RAG and PyTorch. Requires 1-2 years of experience.",
     )
-    score, stars, reason, yoe_favorable = score_job(job, PROFILE, ROLES)
-    assert stars == 5
-    assert "AI Engineer" in reason or "title matches" in reason
-    assert yoe_favorable is True
+    result = score_job(job, PROFILE, ROLES)
+    assert result.stars == 5
+    assert "AI Engineer" in result.reason or "title matches" in result.reason
+    assert result.required_years_experience == 1
+    assert result.has_stack_overlap is True
 
 
 def test_weak_match_scores_low():
@@ -37,9 +38,9 @@ def test_weak_match_scores_low():
         remote=False,
         description="Requires 8+ years of experience with obscure tools.",
     )
-    score, stars, reason, yoe_favorable = score_job(job, PROFILE, ROLES)
-    assert stars <= 2
-    assert yoe_favorable is False
+    result = score_job(job, PROFILE, ROLES)
+    assert result.stars <= 2
+    assert result.required_years_experience == 8
 
 
 def test_higher_score_ranks_above_lower():
@@ -51,9 +52,9 @@ def test_higher_score_ranks_above_lower():
         company_name="Acme", title="Machine Learning Engineer", apply_url="u2", source="test",
         location="Germany", remote=False, description="10+ years required",
     )
-    strong_score, _, _, _ = score_job(strong, PROFILE, ROLES)
-    weak_score, _, _, _ = score_job(weak, PROFILE, ROLES)
-    assert strong_score > weak_score
+    strong_result = score_job(strong, PROFILE, ROLES)
+    weak_result = score_job(weak, PROFILE, ROLES)
+    assert strong_result.score > weak_result.score
 
 
 def test_extract_min_years_from_range_takes_lower_bound():
@@ -101,41 +102,56 @@ def test_extract_min_years_returns_none_when_not_mentioned():
 
 
 def test_yoe_at_or_under_threshold_scores_favorably():
-    score, reason = _score_yoe("requires 2-3 years of experience", max_years_experience=3)
+    score, reason, required = _score_yoe("requires 2-3 years of experience", max_years_experience=3)
     assert score == 10.0
     assert "within your 3-yr preference" in reason
+    assert required == 2
 
 
 def test_yoe_over_threshold_scores_low():
-    score, reason = _score_yoe("requires 7+ years of experience", max_years_experience=3)
+    score, reason, required = _score_yoe("requires 7+ years of experience", max_years_experience=3)
     assert score == 2.0
     assert "above your 3-yr preference" in reason
+    assert required == 7
 
 
 def test_yoe_exactly_at_threshold_is_still_favorable():
-    score, _ = _score_yoe("3 years of experience required", max_years_experience=3)
+    score, _, required = _score_yoe("3 years of experience required", max_years_experience=3)
     assert score == 10.0
+    assert required == 3
 
 
 def test_yoe_not_mentioned_is_neutral_not_penalized():
-    score, reason = _score_yoe("great benefits, flexible hours", max_years_experience=3)
+    score, reason, required = _score_yoe("great benefits, flexible hours", max_years_experience=3)
     assert score == 5.0
     assert reason == ""
+    assert required is None
 
 
-def test_rank_jobs_sets_yoe_favorable_on_the_job_object():
+def test_rank_jobs_sets_required_years_and_stack_overlap_on_the_job_object():
     favorable = Job(
         company_name="Acme", title="AI Engineer", apply_url="u1", source="test",
-        description="1-2 years of experience",
+        description="Python and LLM experience. 1-2 years of experience.",
     )
-    unfavorable = Job(
+    over_experienced = Job(
         company_name="Acme", title="AI Engineer", apply_url="u2", source="test",
-        description="8+ years of experience",
+        description="8+ years of experience with Python.",
     )
-    ranked = rank_jobs([favorable, unfavorable], PROFILE, ROLES)
+    no_stack_overlap = Job(
+        company_name="Acme", title="AI Engineer", apply_url="u3", source="test",
+        description="1 year of experience with unrelated tools.",
+    )
+    ranked = rank_jobs([favorable, over_experienced, no_stack_overlap], PROFILE, ROLES)
     by_url = {j.apply_url: j for j in ranked}
-    assert by_url["u1"].yoe_favorable is True
-    assert by_url["u2"].yoe_favorable is False
+
+    assert by_url["u1"].required_years_experience == 1
+    assert by_url["u1"].has_stack_overlap is True
+
+    assert by_url["u2"].required_years_experience == 8
+    assert by_url["u2"].has_stack_overlap is True
+
+    assert by_url["u3"].required_years_experience == 1
+    assert by_url["u3"].has_stack_overlap is False
 
 
 def test_cap_per_company_keeps_best_n_and_preserves_order():
