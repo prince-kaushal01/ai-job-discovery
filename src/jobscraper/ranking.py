@@ -16,8 +16,14 @@ import re
 from jobscraper.config import ProfileConfig, RolesConfig
 from jobscraper.models import Job
 
-_YOE_RANGE_RE = re.compile(r"(\d+)\s*(?:-|to)\s*(\d+)\s*\+?\s*years?", re.IGNORECASE)
-_YOE_SINGLE_RE = re.compile(r"(\d+)\s*\+?\s*years?", re.IGNORECASE)
+# Unit covers "years"/"year", the "yrs"/"yr" abbreviation, and the "YOE"
+# shorthand (word boundary at the end so it doesn't match inside a longer
+# word). The separator between the number and unit allows a hyphen too, so
+# adjective forms like "3-year experience requirement" match as well as
+# "3 years" / "3+ yrs".
+_YOE_UNIT = r"(?:years?|yrs?|yoe)\b"
+_YOE_RANGE_RE = re.compile(rf"(\d+)\s*(?:-|to)\s*(\d+)\s*\+?\s*{_YOE_UNIT}", re.IGNORECASE)
+_YOE_SINGLE_RE = re.compile(rf"(\d+)[\s-]*\+?\s*{_YOE_UNIT}", re.IGNORECASE)
 
 
 def score_job(job: Job, profile: ProfileConfig, roles: RolesConfig) -> tuple[float, int, str, bool]:

@@ -68,6 +68,34 @@ def test_extract_min_years_from_single_number():
     assert _extract_min_years_required("2 years of Python experience") == 2
 
 
+def test_extract_min_years_from_yrs_abbreviation():
+    assert _extract_min_years_required("Requires 2 yrs of experience") == 2
+
+
+def test_extract_min_years_from_yr_abbreviation():
+    assert _extract_min_years_required("Requires 2 yr experience") == 2
+
+
+def test_extract_min_years_from_yoe_shorthand():
+    assert _extract_min_years_required("3 YOE required") == 3
+    assert _extract_min_years_required("3+ yoe") == 3
+
+
+def test_extract_min_years_from_hyphenated_adjective_form():
+    assert _extract_min_years_required("3-year experience requirement") == 3
+
+
+def test_extract_min_years_from_minimum_at_least_phrasing():
+    assert _extract_min_years_required("minimum of 2 years experience") == 2
+    assert _extract_min_years_required("at least 2 years of experience") == 2
+
+
+def test_extract_min_years_avoids_false_positives():
+    assert _extract_min_years_required("Series Y funding round") is None
+    assert _extract_min_years_required("Python 3.9+ required") is None
+    assert _extract_min_years_required("team of 25 engineers") is None
+
+
 def test_extract_min_years_returns_none_when_not_mentioned():
     assert _extract_min_years_required("Great team, competitive pay") is None
 
