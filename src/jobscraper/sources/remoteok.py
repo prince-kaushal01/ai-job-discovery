@@ -11,9 +11,11 @@ pre-filter keeps volume sane before the shared filtering.py pass runs
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 
 from jobscraper.http_client import HttpClient
 from jobscraper.models import Job
+from jobscraper.sources.date_utils import is_within_window
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +25,11 @@ _AI_ML_HINTS = {
 }
 
 
-def fetch_jobs(client: HttpClient, api_url: str = "https://remoteok.com/api") -> list[Job]:
+def fetch_jobs(
+    client: HttpClient,
+    api_url: str = "https://remoteok.com/api",
+    since: datetime | None = None,
+) -> list[Job]:
     try:
         resp = client.get(api_url)
         if resp.status_code != 200:
@@ -45,6 +51,9 @@ def fetch_jobs(client: HttpClient, api_url: str = "https://remoteok.com/api") ->
 
         tags = {t.lower() for t in (item.get("tags") or [])}
         if not (tags & _AI_ML_HINTS) and not any(h in title.lower() for h in _AI_ML_HINTS):
+            continue
+
+        if not is_within_window(item.get("date"), since):
             continue
 
         company = (item.get("company") or "").strip()

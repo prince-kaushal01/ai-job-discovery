@@ -11,16 +11,23 @@ client-side.
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 
 from jobscraper.http_client import HttpClient
 from jobscraper.models import Job
+from jobscraper.sources.date_utils import is_within_window
 
 logger = logging.getLogger(__name__)
 
 _API_URL = "https://jobicy.com/api/v2/remote-jobs"
 
 
-def fetch_jobs(client: HttpClient, industry: str = "data-science", count: int = 50) -> list[Job]:
+def fetch_jobs(
+    client: HttpClient,
+    industry: str = "data-science",
+    count: int = 50,
+    since: datetime | None = None,
+) -> list[Job]:
     try:
         resp = client.get(_API_URL, params={"count": count, "industry": industry})
         if resp.status_code != 200:
@@ -35,6 +42,9 @@ def fetch_jobs(client: HttpClient, industry: str = "data-science", count: int = 
     for item in data.get("jobs", []):
         title = (item.get("jobTitle") or "").strip()
         if not title:
+            continue
+
+        if not is_within_window(item.get("pubDate"), since):
             continue
 
         jobs.append(

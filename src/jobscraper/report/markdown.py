@@ -16,6 +16,8 @@ def render_markdown(data: ReportData) -> str:
         f"- **New jobs today:** {data.new_jobs_found}",
         f"- **Companies checked:** {data.companies_checked} "
         f"({data.companies_failed} failed/unreachable)",
+        f"- **Global sources checked:** {data.sources_checked} "
+        f"({data.sources_failed} failed/unreachable)",
         "",
         f"## Top {len(data.recommendations)} Recommendations",
         "",

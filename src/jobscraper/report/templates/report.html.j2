@@ -32,15 +32,25 @@
                     <div style="font-size:22px; font-weight:700; color:#166534;">{{ data.new_jobs_found }}</div>
                     <div style="font-size:12px; color:#166534;">New Jobs</div>
                   </td>
-                  <td width="12"></td>
+                </tr>
+                <tr><td colspan="3" height="12"></td></tr>
+                <tr>
                   <td align="center" style="padding:12px; background-color:#f4f5f7; border-radius:8px;">
                     <div style="font-size:22px; font-weight:700; color:#1a1f36;">{{ data.companies_checked }}</div>
                     <div style="font-size:12px; color:#6b7280;">Companies Checked</div>
+                  </td>
+                  <td width="12"></td>
+                  <td align="center" style="padding:12px; background-color:#f4f5f7; border-radius:8px;">
+                    <div style="font-size:22px; font-weight:700; color:#1a1f36;">{{ data.sources_checked }}</div>
+                    <div style="font-size:12px; color:#6b7280;">Global Sources Checked</div>
                   </td>
                 </tr>
               </table>
               {% if data.companies_failed %}
               <p style="font-size:12px; color:#9ca3af; margin:10px 2px 0;">{{ data.companies_failed }} companies were unreachable today and were skipped.</p>
+              {% endif %}
+              {% if data.sources_failed %}
+              <p style="font-size:12px; color:#9ca3af; margin:2px 2px 0;">{{ data.sources_failed }} global source(s) were unreachable today and were skipped.</p>
               {% endif %}
             </td>
           </tr>

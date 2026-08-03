@@ -16,6 +16,8 @@ class ReportData:
     new_jobs_found: int
     companies_checked: int
     companies_failed: int
+    sources_checked: int
+    sources_failed: int
     recommendations: list[Job]
     # New jobs that didn't qualify for `recommendations` (over-experienced,
     # not remote, no direct stack overlap, or just ranked lower) — shown in

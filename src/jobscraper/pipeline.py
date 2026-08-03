@@ -1,13 +1,22 @@
 """Orchestrates one full daily run: fetch -> filter -> dedupe -> rank ->
 store -> report -> email. This is the single entrypoint scripts/run_daily.py
 calls; nothing here should be GitHub-Actions-specific.
+
+Two independent fetch passes feed the same filter/rank/report pipeline:
+  - Company pass: per-company ATS scraping against data/companies.csv
+    (curated, genuine ATS provider + identifier per company — see
+    scripts/detect_ats.py). This is the high-volume source.
+  - Global pass: cross-company aggregators (RemoteOK, WeWorkRemotely,
+    Himalayas, Jobicy) that need no company list, date-windowed via
+    `since` (see _compute_since) so repeat runs only look at what's new.
 """
 
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from jobscraper.companies import load_companies
@@ -18,7 +27,7 @@ from jobscraper.dedupe import dedupe_and_mark
 from jobscraper.email_sender import send_email
 from jobscraper.filtering import filter_jobs
 from jobscraper.http_client import HttpClient
-from jobscraper.models import Job
+from jobscraper.models import Job, utcnow_iso
 from jobscraper.ranking import cap_per_company, rank_jobs
 from jobscraper.report import ReportData
 from jobscraper.report.html import render_html
@@ -26,6 +35,8 @@ from jobscraper.report.markdown import render_markdown
 from jobscraper.sources import himalayas, jobicy, remoteok, weworkremotely
 
 logger = logging.getLogger(__name__)
+
+_LAST_RUN_STATE_KEY = "last_run_completed_at"
 
 
 def _qualifies_for_recommendation(job: Job, max_years_experience: int) -> bool:
@@ -53,6 +64,17 @@ def _not_recommended_reason(job: Job, max_years_experience: int) -> str:
     if not job.has_stack_overlap:
         notes.append("no direct tech-stack overlap detected")
     return "; ".join(notes) if notes else "ranked below your top picks"
+
+
+def _compute_since(db: Database, settings: Settings) -> tuple[datetime, bool]:
+    """First run (nothing recorded yet): look back a few days. Every run
+    after that: only since the previous run completed."""
+    now = datetime.now(timezone.utc)
+    last_run_raw = db.get_state(_LAST_RUN_STATE_KEY)
+    if last_run_raw is None:
+        since = now - timedelta(days=settings.sources.first_run_lookback_days)
+        return since, True
+    return datetime.fromisoformat(last_run_raw), False
 
 
 def _run_company_pass(
@@ -107,27 +129,47 @@ def _run_company_pass(
     return all_jobs, len(companies), companies_failed
 
 
-def _run_global_sources_pass(client: HttpClient, settings: Settings) -> list[Job]:
-    jobs: list[Job] = []
+def _run_global_sources_pass(
+    client: HttpClient, settings: Settings, since: datetime
+) -> tuple[list[Job], int, int]:
+    calls: list[tuple[str, Callable[[], list[Job]]]] = []
 
     for rss in settings.sources.rss:
         if rss.name == "weworkremotely":
-            jobs.extend(weworkremotely.fetch_jobs(client, rss.url))
+            calls.append(
+                ("weworkremotely", lambda url=rss.url: weworkremotely.fetch_jobs(client, url, since=since))
+            )
         else:
             logger.warning("No adapter registered for RSS source %r", rss.name)
 
     remoteok_url = settings.sources.apis.get("remoteok")
     if remoteok_url:
-        jobs.extend(remoteok.fetch_jobs(client, remoteok_url))
+        calls.append(
+            ("remoteok", lambda url=remoteok_url: remoteok.fetch_jobs(client, url, since=since))
+        )
 
     if "himalayas" in settings.sources.apis:
-        jobs.extend(himalayas.fetch_jobs(client, settings.roles.include))
+        calls.append(
+            ("himalayas", lambda: himalayas.fetch_jobs(client, settings.roles.include, since=since))
+        )
 
     if "jobicy" in settings.sources.apis:
-        jobs.extend(jobicy.fetch_jobs(client))
+        calls.append(("jobicy", lambda: jobicy.fetch_jobs(client, since=since)))
 
-    logger.info("Global source pass done: %d jobs found", len(jobs))
-    return jobs
+    jobs: list[Job] = []
+    sources_failed = 0
+    for name, call in calls:
+        try:
+            jobs.extend(call())
+        except Exception as exc:
+            logger.warning("Unexpected failure from source %s: %s", name, exc)
+            sources_failed += 1
+
+    logger.info(
+        "Global source pass done: %d jobs found across %d sources (%d failed)",
+        len(jobs), len(calls), sources_failed,
+    )
+    return jobs, len(calls), sources_failed
 
 
 def run_pipeline(
@@ -147,9 +189,15 @@ def run_pipeline(
     company_jobs, companies_checked, companies_failed = _run_company_pass(
         client, db, settings, company_limit
     )
-    global_jobs = _run_global_sources_pass(client, settings)
-    all_jobs = company_jobs + global_jobs
 
+    since, is_first_run = _compute_since(db, settings)
+    logger.info(
+        "Fetching global-source jobs posted since %s (%s)",
+        since.isoformat(), "first run, lookback window" if is_first_run else "since last run",
+    )
+    global_jobs, sources_checked, sources_failed = _run_global_sources_pass(client, settings, since)
+
+    all_jobs = company_jobs + global_jobs
     relevant_jobs = filter_jobs(all_jobs, settings.roles)
     logger.info("%d jobs after role/keyword filtering", len(relevant_jobs))
 
@@ -189,6 +237,8 @@ def run_pipeline(
         new_jobs_found=len(new_jobs),
         companies_checked=companies_checked,
         companies_failed=companies_failed,
+        sources_checked=sources_checked,
+        sources_failed=sources_failed,
         recommendations=recommendations,
         worth_looking_at=worth_looking_at,
     )
@@ -227,9 +277,12 @@ def run_pipeline(
         new_jobs_found=report_data.new_jobs_found,
         companies_checked=report_data.companies_checked,
         companies_failed=report_data.companies_failed,
+        sources_checked=report_data.sources_checked,
+        sources_failed=report_data.sources_failed,
         report_html_path=str(html_path),
         report_md_path=str(md_path),
         email_sent=email_sent,
     )
+    db.set_state(_LAST_RUN_STATE_KEY, utcnow_iso())
 
     return report_data

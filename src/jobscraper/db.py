@@ -51,6 +51,11 @@ CREATE TABLE IF NOT EXISTS applied_jobs (
     notes TEXT
 );
 
+CREATE TABLE IF NOT EXISTS pipeline_state (
+    key TEXT PRIMARY KEY,
+    value TEXT
+);
+
 CREATE TABLE IF NOT EXISTS daily_reports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     run_date TEXT NOT NULL,
@@ -58,6 +63,8 @@ CREATE TABLE IF NOT EXISTS daily_reports (
     new_jobs_found INTEGER,
     companies_checked INTEGER,
     companies_failed INTEGER,
+    sources_checked INTEGER,
+    sources_failed INTEGER,
     report_html_path TEXT,
     report_md_path TEXT,
     email_sent INTEGER
@@ -72,7 +79,27 @@ class Database:
         self.conn = sqlite3.connect(self.db_path)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA)
+        self._migrate_daily_reports_columns()
         self.conn.commit()
+
+    def _migrate_daily_reports_columns(self) -> None:
+        """daily_reports has gone through two shapes: originally
+        companies_checked/companies_failed (per-company pass only), briefly
+        renamed to sources_checked/sources_failed (aggregator-only pass),
+        now both passes run and need their own columns. Handles a DB
+        currently in either older shape."""
+        cols = {row["name"] for row in self.conn.execute("PRAGMA table_info(daily_reports)")}
+        if "companies_checked" in cols and "sources_checked" not in cols:
+            # Still in the original shape: this DB predates both renames.
+            # Copy into sources_checked/failed too so both concepts exist;
+            # historical values won't reflect a real aggregator-only count,
+            # but that's unavoidable for runs that predate the split.
+            self.conn.execute("ALTER TABLE daily_reports ADD COLUMN sources_checked INTEGER")
+            self.conn.execute("ALTER TABLE daily_reports ADD COLUMN sources_failed INTEGER")
+        elif "companies_checked" not in cols and "sources_checked" in cols:
+            # Went through the aggregator-only rename; add companies_* back.
+            self.conn.execute("ALTER TABLE daily_reports ADD COLUMN companies_checked INTEGER")
+            self.conn.execute("ALTER TABLE daily_reports ADD COLUMN companies_failed INTEGER")
 
     def close(self) -> None:
         self.conn.close()
@@ -204,6 +231,24 @@ class Database:
         )
         self.conn.commit()
 
+    # -- pipeline state ----------------------------------------------------
+
+    def get_state(self, key: str) -> str | None:
+        row = self.conn.execute(
+            "SELECT value FROM pipeline_state WHERE key = ?", (key,)
+        ).fetchone()
+        return row["value"] if row else None
+
+    def set_state(self, key: str, value: str) -> None:
+        self.conn.execute(
+            """
+            INSERT INTO pipeline_state (key, value) VALUES (?, ?)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value
+            """,
+            (key, value),
+        )
+        self.conn.commit()
+
     # -- daily reports -----------------------------------------------------
 
     def record_daily_report(
@@ -213,6 +258,8 @@ class Database:
         new_jobs_found: int,
         companies_checked: int,
         companies_failed: int,
+        sources_checked: int,
+        sources_failed: int,
         report_html_path: str,
         report_md_path: str,
         email_sent: bool,
@@ -222,8 +269,9 @@ class Database:
             INSERT INTO daily_reports (
                 run_date, total_jobs_found, new_jobs_found,
                 companies_checked, companies_failed,
+                sources_checked, sources_failed,
                 report_html_path, report_md_path, email_sent
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 run_date,
@@ -231,6 +279,8 @@ class Database:
                 new_jobs_found,
                 companies_checked,
                 companies_failed,
+                sources_checked,
+                sources_failed,
                 report_html_path,
                 report_md_path,
                 int(email_sent),

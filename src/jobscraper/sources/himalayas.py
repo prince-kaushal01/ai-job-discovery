@@ -11,9 +11,11 @@ its full ~95k-job feed and filtering client-side.
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 
 from jobscraper.http_client import HttpClient
 from jobscraper.models import Job
+from jobscraper.sources.date_utils import is_within_window
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +23,10 @@ _SEARCH_URL = "https://himalayas.app/jobs/api/search"
 
 
 def fetch_jobs(
-    client: HttpClient, role_keywords: list[str], per_query_limit: int = 20
+    client: HttpClient,
+    role_keywords: list[str],
+    per_query_limit: int = 20,
+    since: datetime | None = None,
 ) -> list[Job]:
     jobs: list[Job] = []
     seen_guids: set[str] = set()
@@ -48,6 +53,9 @@ def fetch_jobs(
 
             title = (item.get("title") or "").strip()
             if not title:
+                continue
+
+            if not is_within_window(item.get("pubDate"), since):
                 continue
 
             locations = item.get("locationRestrictions") or []

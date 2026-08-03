@@ -25,6 +25,8 @@ def _sample_data() -> ReportData:
         new_jobs_found=3,
         companies_checked=215,
         companies_failed=2,
+        sources_checked=4,
+        sources_failed=0,
         recommendations=[job],
     )
 

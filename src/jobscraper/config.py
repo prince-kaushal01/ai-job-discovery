@@ -34,6 +34,9 @@ class SourcesConfig(BaseModel):
     companies_csv: str = "data/companies.csv"
     rss: list[RssSource] = []
     apis: dict[str, str] = {}
+    # On the very first run (no prior run recorded), fetch jobs posted in the
+    # last N days. Every run after that only fetches since the previous run.
+    first_run_lookback_days: int = 3
 
 
 class HttpConfig(BaseModel):
