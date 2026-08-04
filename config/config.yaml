@@ -105,8 +105,8 @@ email:
   smtp_port: 587
   sender_env_var: EMAIL_SENDER
   password_env_var: EMAIL_APP_PASSWORD
-  recipient: palyashika641@gmail.com
-  top_n_in_email: 20
+  recipient: princekaushal357@gmail.com
+  top_n_in_email: 30
   min_stars_in_email: 3
   worth_looking_at_limit: 30   # cap on the collapsible "other jobs" section
 
